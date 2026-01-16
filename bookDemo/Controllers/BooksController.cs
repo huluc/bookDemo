@@ -2,6 +2,7 @@
 using bookDemo.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace bookDemo.Controllers
@@ -75,5 +76,17 @@ namespace bookDemo.Controllers
             return NoContent(); // 204
         }
 
+        [HttpPatch("{id:int}")]
+        public IActionResult PatchBook([FromRoute] int id, [FromBody] JsonPatchDocument<Book> bookPatch)
+        {
+            var book = ApplicationContext.Books.FirstOrDefault(b => b.Id == id);
+            if (book is null)
+                return NotFound();
+
+         bookPatch.ApplyTo(book, ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            return NoContent(); // 204
+        }
     }
 }
