@@ -2,20 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using bookDemo.Repositories;
+using bookDemo.Infrastructure.Repositories;
 
 #nullable disable
 
-namespace bookDemo.Migrations
+namespace BookDemo.Infrastructure.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20260120175219_InitialCreate")]
-    partial class InitialCreate
+    partial class RepositoryContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,7 +21,7 @@ namespace bookDemo.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("bookDemo.Models.Book", b =>
+            modelBuilder.Entity("Entities.Models.Book", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -42,6 +39,26 @@ namespace bookDemo.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Books");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Price = 45.90m,
+                            Title = "Clean Code"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Price = 59.99m,
+                            Title = "Domain-Driven Design"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Price = 39.95m,
+                            Title = "The Pragmatic Programmer"
+                        });
                 });
 #pragma warning restore 612, 618
         }

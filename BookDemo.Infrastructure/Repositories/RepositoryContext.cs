@@ -1,8 +1,8 @@
-﻿using bookDemo.Models;
-using bookDemo.Models.config;
+﻿using bookDemo.Repositories;
+using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace bookDemo.Repositories
+namespace bookDemo.Infrastructure.Repositories
 {
     public class RepositoryContext : DbContext
     {

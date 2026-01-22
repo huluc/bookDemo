@@ -1,3 +1,6 @@
 <Solution>
-  <Project Path="bookDemo/bookDemo.csproj" />
+  <Project Path="BookDemo.Application/BookDemo.Application.csproj" />
+  <Project Path="BookDemo.Domain/BookDemo.Domain.csproj" />
+  <Project Path="BookDemo.Infrastructure/BookDemo.Infrastructure.csproj" />
+  <Project Path="bookDemo/BookDemo.API.csproj" />
 </Solution>

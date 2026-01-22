@@ -1,3 +1,4 @@
+using bookDemo.Infrastructure.Repositories;
 using bookDemo.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
@@ -16,7 +17,7 @@ builder.Services.AddOpenApi();
 // and the defined service lifetime to create and manage the DbContext instance.
 builder.Services.AddDbContext<RepositoryContext>(options =>
 {
-    options.UseSqlServer (builder.Configuration.GetConnectionString("sqlConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"), sql => sql.MigrationsAssembly("BookDemo.Infrastructure"));
 });
 
 var app = builder.Build();

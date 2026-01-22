@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Entities.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace bookDemo.Models.config
+namespace bookDemo.Repositories
 {
     public class BookConfig : IEntityTypeConfiguration<Book>
     {
@@ -27,6 +28,5 @@ namespace bookDemo.Models.config
              }
      );
         }
-
     }
 }

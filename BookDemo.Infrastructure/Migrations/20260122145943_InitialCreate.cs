@@ -2,7 +2,9 @@
 
 #nullable disable
 
-namespace bookDemo.Migrations
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+namespace BookDemo.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -22,6 +24,16 @@ namespace bookDemo.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Books", x => x.Id);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Books",
+                columns: new[] { "Id", "Price", "Title" },
+                values: new object[,]
+                {
+                    { 1, 45.90m, "Clean Code" },
+                    { 2, 59.99m, "Domain-Driven Design" },
+                    { 3, 39.95m, "The Pragmatic Programmer" }
                 });
         }
 
