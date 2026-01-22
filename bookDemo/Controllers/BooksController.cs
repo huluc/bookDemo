@@ -1,5 +1,6 @@
-﻿using bookDemo.Data;
+﻿
 using bookDemo.Models;
+using bookDemo.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
@@ -11,17 +12,25 @@ namespace bookDemo.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
+        // BooksController depends on RepositoryContext.
+        // The controller does not create it itself; the dependency is injected
+        // from the outside by the DI container.
+        private readonly RepositoryContext _context;
+        public BooksController(RepositoryContext context)
+        {
+            _context = context;
+        }
         [HttpGet]
         public IActionResult GetBooks()
         {
-            return Ok(ApplicationContext.Books);
+            var books = _context.Books.ToList();
+            return Ok(books);
         }
 
-        [HttpGet]
-        [Route("{id:int}")]
+        [HttpGet("{id:int}")]
         public IActionResult GetBookById([FromRoute(Name = "id")] int id)
         {
-            var book = ApplicationContext.Books.FirstOrDefault(b => b.Id == id);
+            var book = _context.Books.Find(id);
             return book is null ? NotFound() : Ok(book);
 
         }
@@ -32,27 +41,28 @@ namespace bookDemo.Controllers
 
                 return BadRequest("Book can not be null");
 
-            book.Id = ApplicationContext.Books.Any()
-                ? ApplicationContext.Books.Max(b => b.Id) + 1
-                : 1;
-            ApplicationContext.Books.Add(book);
+            _context.Books.Add(book);
+            _context.SaveChanges();
+
+            // After successfully saving the entity, this returns HTTP 201 Created and sets
+            // the Location header to the URL of the GetBookById endpoint,
+            // allowing clients to fetch the created resource via its identifier.
             return CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book);
         }
         [HttpPut("{id:int}")]
         public IActionResult UpdateBook([FromRoute] int id, [FromBody] Book book)
         {
-            if (book is null)
-                return BadRequest("Book cannot be null");
-
             if (id != book.Id)
                 return BadRequest("Book ID mismatch");
 
-            var existing = ApplicationContext.Books.FirstOrDefault(b => b.Id == id);
-            if (existing is null)
+            var existingBook = _context.Books.Find(id);
+            if (existingBook is null)
                 return NotFound();
 
-            existing.Title = book.Title;
-            existing.Price = book.Price;
+            existingBook.Title = book.Title;
+            existingBook.Price = book.Price;
+
+            _context.SaveChanges();
 
             return NoContent(); // 204
         }
@@ -60,32 +70,35 @@ namespace bookDemo.Controllers
         [HttpDelete("{id:int}")]
         public IActionResult DeleteBook([FromRoute] int id)
         {
-            var book = ApplicationContext.Books.FirstOrDefault(b => b.Id == id);
+            var book = _context.Books.Find(id);
             if (book is null)
-                return NotFound(new
-                {
-                    Message = $"Book with ID {id} not found."
-                });
-            ApplicationContext.Books.Remove(book);
+                return NotFound();
+            
+            _context.Books.Remove(book);
+            _context.SaveChanges();
+
             return NoContent(); // 204
         }
-        [HttpDelete]
-        public IActionResult DeleteAllBooks()
-        {
-            ApplicationContext.Books.Clear();
-            return NoContent(); // 204
-        }
+
 
         [HttpPatch("{id:int}")]
         public IActionResult PatchBook([FromRoute] int id, [FromBody] JsonPatchDocument<Book> bookPatch)
         {
-            var book = ApplicationContext.Books.FirstOrDefault(b => b.Id == id);
+            if (bookPatch is null)
+                return BadRequest("Book patch cannot be null");
+
+            var book = _context.Books.Find(id);
             if (book is null)
                 return NotFound();
 
-         bookPatch.ApplyTo(book, ModelState);
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            // Apply patch and collect JSON Patch errors into ModelState
+            bookPatch.ApplyTo(book, ModelState);
+
+            // Validate entity after patch (DataAnnotations etc.)
+            if (!TryValidateModel(book))
+                return ValidationProblem(ModelState);
+    
+            _context.SaveChanges();
             return NoContent(); // 204
         }
     }

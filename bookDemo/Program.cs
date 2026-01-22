@@ -11,6 +11,9 @@ builder.Services.AddControllers()
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// When RepositoryContext is requested, the DI container knows how to construct it:
+// it uses the configured connection string, the SQL Server provider,
+// and the defined service lifetime to create and manage the DbContext instance.
 builder.Services.AddDbContext<RepositoryContext>(options =>
 {
     options.UseSqlServer (builder.Configuration.GetConnectionString("sqlConnection"));
