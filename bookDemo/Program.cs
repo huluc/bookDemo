@@ -1,5 +1,4 @@
-using bookDemo.Infrastructure.Repositories;
-using bookDemo.Repositories;
+using BookDemo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
 

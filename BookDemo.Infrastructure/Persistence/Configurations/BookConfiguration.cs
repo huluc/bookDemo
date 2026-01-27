@@ -1,9 +1,21 @@
 ﻿using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace bookDemo.Repositories
+namespace BookDemo.Infrastructure.Persistence.Configurations
 {
-    public class BookConfig : IEntityTypeConfiguration<Book>
+    /// <summary>
+    /// BookConfiguration defines EF Core Fluent API
+    /// mappings for the Book entity.
+    /// 
+    /// Responsibilities:
+    /// - Configures table name, keys, and relationships
+    /// - Defines column constraints and precision
+    /// - Keeps entity classes clean from persistence concerns
+    /// 
+    /// This configuration is applied by RepositoryContext
+    /// during model creation.
+    /// </summary>
+    public class BookConfiguration : IEntityTypeConfiguration<Book>
     {
         public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<Book> builder)
         {
