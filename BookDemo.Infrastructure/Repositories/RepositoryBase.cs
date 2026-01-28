@@ -8,6 +8,15 @@ using System.Text;
 
 namespace BookDemo.Infrastructure.Repositories
 {
+    /// <summary>
+    /// Base class for EF Core repositories.
+    /// 
+    /// Repositories are responsible for querying and manipulating entities,
+    /// but they MUST NOT call SaveChanges().
+    ///
+    /// Persistence is coordinated by the Unit of Work
+    /// (RepositoryManager) to ensure transactional consistency.
+    /// </summary>
     public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class
     {
         protected readonly RepositoryContext _context;
