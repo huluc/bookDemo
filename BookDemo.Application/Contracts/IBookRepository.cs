@@ -1,13 +1,13 @@
 ﻿using Entities.Models;
 namespace BookDemo.Application.Contracts
 {
-    public interface IBookRepository
+    public interface IBookRepository:IRepositoryBase<Book>
     {
         /// <summary>
         /// Gets a single Book by its primary key.
         /// Type-safe alternative to a generic GetById(object id).
         /// </summary>
-        Book? GetById(int id);
+        Book? GetById(int id, bool trackChanges);
 
         /// <summary>
         /// Checks if a book exists by id.

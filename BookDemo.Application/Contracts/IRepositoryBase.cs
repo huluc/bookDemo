@@ -45,9 +45,9 @@ namespace BookDemo.Application.Contracts
         /// Returns items matching the predicate.
         /// The implementation decides how to evaluate it (e.g., EF Core translates to SQL).
         /// </summary>
-        IReadOnlyList<T> GetByCondition(Expression<Func<T, bool>> predicate);
+        IReadOnlyList<T> GetByCondition(Expression<Func<T, bool>> predicate, bool trackChanges);
 
-        public IReadOnlyList<T> GetAll();
+        public IReadOnlyList<T> GetAll(bool trackChanges);
 
         // WRITE
         void Add(T entity);
