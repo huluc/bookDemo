@@ -1,4 +1,5 @@
-﻿using BookDemo.Infrastructure.Persistence;
+﻿using BookDemo.Application.Contracts;
+using BookDemo.Infrastructure.Persistence;
 using Entities.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -14,22 +15,24 @@ namespace bookDemo.Controllers
         // BooksController depends on RepositoryContext.
         // The controller does not create it itself; the dependency is injected
         // from the outside by the DI container.
-        private readonly RepositoryContext _context;
-        public BooksController(RepositoryContext context)
+        private readonly IRepositoryManager _manager;
+
+        public BooksController(IRepositoryManager manager)
         {
-            _context = context;
+            _manager = manager;
         }
+
         [HttpGet]
         public IActionResult GetBooks()
         {
-            var books = _context.Books.ToList();
+            var books = _manager.Books.GetAll(false); 
             return Ok(books);
         }
 
         [HttpGet("{id:int}")]
         public IActionResult GetBookById([FromRoute(Name = "id")] int id)
         {
-            var book = _context.Books.Find(id);
+            var book = _manager.Books.GetById(id,false);
             return book is null ? NotFound() : Ok(book);
 
         }
@@ -40,8 +43,8 @@ namespace bookDemo.Controllers
 
                 return BadRequest("Book can not be null");
 
-            _context.Books.Add(book);
-            _context.SaveChanges();
+            _manager.Books.Add(book);
+            _manager.Save(); // Commit changes to the database
 
             // After successfully saving the entity, this returns HTTP 201 Created and sets
             // the Location header to the URL of the GetBookById endpoint,
@@ -54,14 +57,14 @@ namespace bookDemo.Controllers
             if (id != book.Id)
                 return BadRequest("Book ID mismatch");
 
-            var existingBook = _context.Books.Find(id);
+            var existingBook = _manager.Books.GetById(id,true);
             if (existingBook is null)
                 return NotFound();
 
             existingBook.Title = book.Title;
             existingBook.Price = book.Price;
 
-            _context.SaveChanges();
+            _manager.Save();
 
             return NoContent(); // 204
         }
@@ -69,12 +72,12 @@ namespace bookDemo.Controllers
         [HttpDelete("{id:int}")]
         public IActionResult DeleteBook([FromRoute] int id)
         {
-            var book = _context.Books.Find(id);
+            var book = _manager.Books.GetById(id,true);
             if (book is null)
                 return NotFound();
             
-            _context.Books.Remove(book);
-            _context.SaveChanges();
+            _manager.Books.Delete(book);
+            _manager.Save();
 
             return NoContent(); // 204
         }
@@ -86,7 +89,7 @@ namespace bookDemo.Controllers
             if (bookPatch is null)
                 return BadRequest("Book patch cannot be null");
 
-            var book = _context.Books.Find(id);
+            var book = _manager.Books.GetById(id, true);
             if (book is null)
                 return NotFound();
 
@@ -97,7 +100,7 @@ namespace bookDemo.Controllers
             if (!TryValidateModel(book))
                 return ValidationProblem(ModelState);
     
-            _context.SaveChanges();
+            _manager.Save();
             return NoContent(); // 204
         }
     }

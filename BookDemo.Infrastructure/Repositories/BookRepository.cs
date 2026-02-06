@@ -19,9 +19,9 @@ namespace BookDemo.Infrastructure.Repositories
             return Set.AsNoTracking().Any(b => b.Id == id);
         }
 
-        public Book? GetById(int id)
+        public Book? GetById(int id, bool trackChanges)
         {
-            return Set.AsNoTracking().SingleOrDefault(b => b.Id == id);
+            return trackChanges ? Set.Find(id) : Set.AsNoTracking().SingleOrDefault(b => b.Id == id);
         }
 
         public IReadOnlyList<Book> GetByTitleContains(string text)
