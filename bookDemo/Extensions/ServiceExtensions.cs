@@ -1,4 +1,6 @@
-﻿using BookDemo.Infrastructure.Persistence;
+﻿using BookDemo.Application.Contracts;
+using BookDemo.Infrastructure.Persistence;
+using BookDemo.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookDemo.API.Extensions
@@ -12,6 +14,11 @@ namespace BookDemo.API.Extensions
                 options.UseSqlServer(
                     configuration.GetConnectionString("sqlConnection")));
 
+        }
+        public static void ConfigureRepositoryManager(this IServiceCollection services)
+        {
+            // Registers the RepositoryManager as a scoped service for dependency injection.
+            services.AddScoped<IRepositoryManager, RepositoryManager>();
         }
     }
 }
