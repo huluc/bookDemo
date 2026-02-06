@@ -18,6 +18,7 @@ builder.Services.AddOpenApi();
 // it uses the configured connection string, the SQL Server provider,
 // and the defined service lifetime to create and manage the DbContext instance.
 builder.Services.ConfigureSqlContext(builder.Configuration);
+builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.ConfigureRepositoryManager();
 
 var app = builder.Build();
