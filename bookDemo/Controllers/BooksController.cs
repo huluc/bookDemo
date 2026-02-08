@@ -37,7 +37,7 @@ namespace bookDemo.Controllers
 
         }
         [HttpPost]
-        public IActionResult AddBook([FromBody] Book book)
+        public IActionResult CreateBook([FromBody] Book book)
         {
             if (book is null)
 
