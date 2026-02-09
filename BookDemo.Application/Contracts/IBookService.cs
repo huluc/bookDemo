@@ -71,12 +71,15 @@ GetBookById yerine GetBook veya GetBookDetails*/
         /// Updates an existing book.
         /// Returns false if the book does not exist.
         /// </summary>
-        void UpdateBook(int id, Book book);
+        bool UpdateBook(int id, Book book);
 
         /// <summary>
         /// Deletes a book by its identifier.
         /// Returns false if the book does not exist.
         /// </summary>
-        void DeleteBook(int id);
+        bool DeleteBook(int id);
+
+
+
     }
 }

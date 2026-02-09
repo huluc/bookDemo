@@ -1,24 +1,35 @@
 ﻿using BookDemo.Application.Contracts;
 using BookDemo.Infrastructure.Persistence;
 using BookDemo.Infrastructure.Repositories;
+using BookDemo.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookDemo.API.Extensions
 {
     public static class ServiceExtensions
     {
-        public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration)
         {
             // Configures the DbContext to use SQL Server with the connection string from configuration.
             services.AddDbContext<RepositoryContext>(options =>
                 options.UseSqlServer(
                     configuration.GetConnectionString("sqlConnection")));
+            return services; //enables method chaining by returning the IServiceCollection instance.
 
         }
-        public static void ConfigureRepositoryManager(this IServiceCollection services)
+        public static IServiceCollection ConfigureRepositoryManager(this IServiceCollection services)
         {
             // Registers the RepositoryManager as a scoped service for dependency injection.
             services.AddScoped<IRepositoryManager, RepositoryManager>();
+            return services; //enables method chaining by returning the IServiceCollection instance.
+
+        }
+
+        public static IServiceCollection ConfigureServiceManager (this IServiceCollection services)
+        {
+            // Registers the ServiceManager as a scoped service for dependency injection.
+            services.AddScoped<IServiceManager, ServiceManager>();
+            return services; //enables method chaining by returning the IServiceCollection instance.
         }
     }
 }
