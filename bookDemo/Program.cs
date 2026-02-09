@@ -2,6 +2,7 @@ using BookDemo.API.Extensions;
 using BookDemo.Application.Contracts;
 using BookDemo.Infrastructure.Persistence;
 using BookDemo.Infrastructure.Repositories;
+using BookDemo.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
 
@@ -17,9 +18,11 @@ builder.Services.AddOpenApi();
 // When RepositoryContext is requested, the DI container knows how to construct it:
 // it uses the configured connection string, the SQL Server provider,
 // and the defined service lifetime to create and manage the DbContext instance.
-builder.Services.ConfigureSqlContext(builder.Configuration);
-builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
-builder.Services.ConfigureRepositoryManager();
+builder.Services
+    .ConfigureSqlContext(builder.Configuration)
+    .ConfigureRepositoryManager()
+    .ConfigureServiceManager();
+
 
 var app = builder.Build();
 

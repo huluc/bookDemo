@@ -12,27 +12,25 @@ namespace bookDemo.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        // BooksController depends on RepositoryContext.
-        // The controller does not create it itself; the dependency is injected
-        // from the outside by the DI container.
-        private readonly IRepositoryManager _manager;
 
-        public BooksController(IRepositoryManager manager)
+        private readonly IServiceManager _services;
+
+        public BooksController(IServiceManager services)
         {
-            _manager = manager;
+            _services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
         [HttpGet]
         public IActionResult GetBooks()
         {
-            var books = _manager.Books.GetAll(false); 
+            var books = _services.BookService.GetBooks() ;
             return Ok(books);
         }
 
         [HttpGet("{id:int}")]
         public IActionResult GetBookById([FromRoute(Name = "id")] int id)
         {
-            var book = _manager.Books.GetById(id,false);
+            var book = _services.BookService.GetBookById(id);
             return book is null ? NotFound() : Ok(book);
 
         }
@@ -43,41 +41,28 @@ namespace bookDemo.Controllers
 
                 return BadRequest("Book can not be null");
 
-            _manager.Books.Add(book);
-            _manager.Save(); // Commit changes to the database
+            var created = _services.BookService.CreateBook(book);
+          
 
-            // After successfully saving the entity, this returns HTTP 201 Created and sets
-            // the Location header to the URL of the GetBookById endpoint,
-            // allowing clients to fetch the created resource via its identifier.
-            return CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book);
+           return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
         }
         [HttpPut("{id:int}")]
         public IActionResult UpdateBook([FromRoute] int id, [FromBody] Book book)
         {
-            if (id != book.Id)
+
+            if (book is null || id != book.Id)
                 return BadRequest("Book ID mismatch");
 
-            var existingBook = _manager.Books.GetById(id,true);
-            if (existingBook is null)
-                return NotFound();
-
-            existingBook.Title = book.Title;
-            existingBook.Price = book.Price;
-
-            _manager.Save();
-
-            return NoContent(); // 204
+            var ok = _services.BookService.UpdateBook(id, book);
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult DeleteBook([FromRoute] int id)
         {
-            var book = _manager.Books.GetById(id,true);
-            if (book is null)
-                return NotFound();
-            
-            _manager.Books.Delete(book);
-            _manager.Save();
+            var ok =  _services.BookService.DeleteBook(id);
+            return ok ? NoContent() : NotFound();
+
 
             return NoContent(); // 204
         }
@@ -89,19 +74,24 @@ namespace bookDemo.Controllers
             if (bookPatch is null)
                 return BadRequest("Book patch cannot be null");
 
-            var book = _manager.Books.GetById(id, true);
+            var book = _services.BookService.GetBookById(id);
             if (book is null)
                 return NotFound();
 
             // Apply patch and collect JSON Patch errors into ModelState
             bookPatch.ApplyTo(book, ModelState);
 
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
             // Validate entity after patch (DataAnnotations etc.)
             if (!TryValidateModel(book))
                 return ValidationProblem(ModelState);
-    
-            _manager.Save();
+
+            _services.BookService.UpdateBook(id, book); // Update the entity in the data store
+
             return NoContent(); // 204
         }
+  
     }
 }
