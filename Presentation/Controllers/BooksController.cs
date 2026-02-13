@@ -16,7 +16,7 @@ namespace BookDemo.Presentation.Controllers
     //
     // The Presentation layer contains controllers and everything related to
     // handling HTTP requests (routing, model binding, validation, ModelState, etc.).
-    
+
     // This separation keeps the host thin and allows the same Presentation layer
     // to be reused with different hosts if needed.
 
@@ -54,9 +54,8 @@ namespace BookDemo.Presentation.Controllers
                 return BadRequest("Book can not be null");
 
             var created = _services.BookService.CreateBook(book);
-
-
             return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
+
         }
         [HttpPut("{id:int}")]
         public IActionResult UpdateBook([FromRoute] int id, [FromBody] Book book)
@@ -73,6 +72,7 @@ namespace BookDemo.Presentation.Controllers
         public IActionResult DeleteBook([FromRoute] int id)
         {
             var ok = _services.BookService.DeleteBook(id);
+
             return ok ? NoContent() : NotFound();
 
 
@@ -104,5 +104,6 @@ namespace BookDemo.Presentation.Controllers
 
             return NoContent(); // 204
         }
+
     }
 }
