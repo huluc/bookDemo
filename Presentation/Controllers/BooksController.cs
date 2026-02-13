@@ -1,13 +1,25 @@
 ﻿using BookDemo.Application.Contracts;
-using BookDemo.Infrastructure.Persistence;
 using Entities.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace bookDemo.Controllers
+namespace BookDemo.Presentation.Controllers
 {
+    // We separated the Presentation layer from the Web API host project
+    // to clearly isolate HTTP and framework-related concerns.
+    //
+    // The Web API project is only responsible for starting the application
+    // (Program.cs, middleware configuration, dependency injection setup).
+    //
+    // The Presentation layer contains controllers and everything related to
+    // handling HTTP requests (routing, model binding, validation, ModelState, etc.).
+
+    // This separation keeps the host thin and allows the same Presentation layer
+    // to be reused with different hosts if needed.
+
     [Route("api/[controller]")]
     [ApiController]
     public class BooksController : ControllerBase
@@ -23,7 +35,7 @@ namespace bookDemo.Controllers
         [HttpGet]
         public IActionResult GetBooks()
         {
-            var books = _services.BookService.GetBooks() ;
+            var books = _services.BookService.GetBooks();
             return Ok(books);
         }
 
@@ -42,9 +54,8 @@ namespace bookDemo.Controllers
                 return BadRequest("Book can not be null");
 
             var created = _services.BookService.CreateBook(book);
-          
+            return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
 
-           return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
         }
         [HttpPut("{id:int}")]
         public IActionResult UpdateBook([FromRoute] int id, [FromBody] Book book)
@@ -60,7 +71,8 @@ namespace bookDemo.Controllers
         [HttpDelete("{id:int}")]
         public IActionResult DeleteBook([FromRoute] int id)
         {
-            var ok =  _services.BookService.DeleteBook(id);
+            var ok = _services.BookService.DeleteBook(id);
+
             return ok ? NoContent() : NotFound();
 
 
@@ -92,6 +104,6 @@ namespace bookDemo.Controllers
 
             return NoContent(); // 204
         }
-  
+
     }
 }
