@@ -3,4 +3,5 @@
   <Project Path="BookDemo.Domain/BookDemo.Domain.csproj" />
   <Project Path="BookDemo.Infrastructure/BookDemo.Infrastructure.csproj" />
   <Project Path="bookDemo/BookDemo.API.csproj" />
+  <Project Path="Presentation/BookDemo.Presentation.csproj" Id="cda74482-0523-41e2-9f63-7cd36d5a484f" />
 </Solution>
