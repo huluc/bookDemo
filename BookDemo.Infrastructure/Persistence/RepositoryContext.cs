@@ -23,7 +23,7 @@ namespace BookDemo.Infrastructure.Persistence
     /// </summary>
     public class RepositoryContext : DbContext
     {
-        public RepositoryContext(DbContextOptions options): base(options)
+        public RepositoryContext(DbContextOptions<RepositoryContext> options): base(options)
         {
 
         }
