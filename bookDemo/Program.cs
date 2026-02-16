@@ -5,8 +5,15 @@ using BookDemo.Infrastructure.Repositories;
 using BookDemo.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// 1) Clean  Default logging providers
+builder.Logging.ClearProviders();
+
+// 2) Connect NLog as the logging provider for the application
+builder.Host.UseNLog();
 
 // Add services to the container.
 
