@@ -33,10 +33,17 @@ builder.Services
 
 var app = builder.Build();
 
+app.UseGlobalExceptionHandling();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+}
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();

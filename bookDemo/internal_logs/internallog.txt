@@ -1,3 +1,15 @@
 2026-02-16 12:19:49.1070 Info Registered target NLog.Targets.FileTarget(Name=logfile)
 2026-02-16 12:19:49.1572 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.1.0.4914. Product version: 6.1.0+5b1846554f5a8f98878ca64cce5a485ca3b8275c. GlobalAssemblyCache: False
 2026-02-16 12:19:49.2239 Info Configuration initialized: TargetNames=logfile, ConfigItems=12, AutoReload=true, FilePath=C:\Users\m_ser\Desktop\AspNetCoreWebApi\Applications\bookDemo\bookDemo\nlog.config
+2026-03-13 11:47:26.9228 Info Registered target NLog.Targets.FileTarget(Name=logfile)
+2026-03-13 11:47:27.0635 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.1.0.4914. Product version: 6.1.0+5b1846554f5a8f98878ca64cce5a485ca3b8275c. GlobalAssemblyCache: False
+2026-03-13 11:47:27.1713 Info Configuration initialized: TargetNames=logfile, ConfigItems=12, AutoReload=true, FilePath=C:\Users\m_ser\Desktop\AspNetCoreWebApi\Applications\bookDemo\bookDemo\nlog.config
+2026-03-13 13:24:46.3891 Info Registered target NLog.Targets.FileTarget(Name=logfile)
+2026-03-13 13:24:46.5320 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.1.0.4914. Product version: 6.1.0+5b1846554f5a8f98878ca64cce5a485ca3b8275c. GlobalAssemblyCache: False
+2026-03-13 13:24:46.7394 Info Configuration initialized: TargetNames=logfile, ConfigItems=12, AutoReload=true, FilePath=C:\Users\m_ser\Desktop\AspNetCoreWebApi\Applications\bookDemo\bookDemo\nlog.config
+2026-03-13 13:25:12.3435 Info Registered target NLog.Targets.FileTarget(Name=logfile)
+2026-03-13 13:25:12.3703 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.1.0.4914. Product version: 6.1.0+5b1846554f5a8f98878ca64cce5a485ca3b8275c. GlobalAssemblyCache: False
+2026-03-13 13:25:12.4166 Info Configuration initialized: TargetNames=logfile, ConfigItems=12, AutoReload=true, FilePath=C:\Users\m_ser\Desktop\AspNetCoreWebApi\Applications\bookDemo\bookDemo\nlog.config
+2026-03-13 13:29:41.2932 Info Registered target NLog.Targets.FileTarget(Name=logfile)
+2026-03-13 13:29:41.3246 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.1.0.4914. Product version: 6.1.0+5b1846554f5a8f98878ca64cce5a485ca3b8275c. GlobalAssemblyCache: False
+2026-03-13 13:29:41.4187 Info Configuration initialized: TargetNames=logfile, ConfigItems=12, AutoReload=true, FilePath=C:\Users\m_ser\Desktop\AspNetCoreWebApi\Applications\bookDemo\bookDemo\nlog.config
