@@ -1,0 +1,215 @@
+Kodumuz şu:
+
+[HttpGet("{id:int}")]
+public async Task<IActionResult> GetBookById(int id)
+{
+    var book = await _context.Books.FindAsync(id);
+    return book is null ? NotFound() : Ok(book);
+}
+
+
+Bunu parça parça sökelim.
+
+1️⃣ Önce büyük resmi görelim
+
+Bu metot şunu yapıyor:
+
+“Veritabanına git, bir kitabı bul, sonucu HTTP response olarak dön.”
+
+Ama bunu senkron (bloklayarak) değil,
+asenkron (beklerken thread’i boşa çıkartarak) yapıyor.
+
+2️⃣ Task NEDİR? (en temelinden)
+Günlük hayattan örnekle:
+
+Bir restorandasın:
+
+Sen garsonsın
+
+Mutfağa sipariş veriyorsun
+
+Senkron çalışma:
+
+Siparişi verdin
+
+Mutfağın başında bekliyorsun
+
+Hiçbir şey yapamıyorsun
+
+Asenkron çalışma:
+
+Siparişi verdin
+
+“Hazır olunca haber ver” dedin
+
+Bu sırada başka masalara bakıyorsun
+
+👉 Task = “devam eden bir iş”
+
+Kod tarafında:
+Task<IActionResult>
+
+
+şu demek:
+
+“Bu metot hemen bir sonuç dönmeyecek
+ama ileride bir IActionResult üretecek.”
+
+Yani:
+
+Task = gelecekte tamamlanacak iş
+
+IActionResult = iş bittiğinde çıkacak sonuç
+
+3️⃣ async NE DEMEK?
+public async Task<IActionResult> GetBookById(int id)
+
+
+async şunu söyler:
+
+“Bu metodun içinde bekleyebileceğim işlemler var.”
+
+Yani:
+
+Bu metot içinde await kullanılacak
+
+Metot yarıda durabilir
+
+Thread serbest kalabilir
+
+📌 async tek başına hiçbir şey yapmaz
+📌 async = “await kullanacağım” sözü
+
+4️⃣ await NE DEMEK?
+
+Şu satıra bakalım:
+
+var book = await _context.Books.FindAsync(id);
+
+
+await şunu yapar:
+
+“Bu iş bitene kadar bekle
+AMA thread’i kilitleme
+İş bitince buradan devam et”
+
+Çok önemli fark:
+
+await = non-blocking wait
+
+Thread.Sleep ≠ await
+
+.Result ≠ await
+
+Teknik olarak:
+
+DB’ye sorgu gönderilir
+
+Cevap gelene kadar thread boşa çıkar
+
+Cevap gelince kod kaldığı yerden devam eder
+
+5️⃣ Find vs FindAsync NEDİR?
+Find
+var book = _context.Books.Find(id);
+
+
+Senkron çalışır
+
+DB’ye giderken thread bloklanır
+
+DB yavaşsa → thread bekler
+
+FindAsync
+var book = await _context.Books.FindAsync(id);
+
+
+Asenkron çalışır
+
+DB’ye istek atılır
+
+Thread serbest kalır
+
+Sonuç gelince devam eder
+
+📌 ASP.NET Core’da önerilen her zaman async versiyonudur
+
+6️⃣ “Async olmasa ne olurdu?”
+Senkron hali:
+public IActionResult GetBookById(int id)
+{
+    var book = _context.Books.Find(id);
+    return book is null ? NotFound() : Ok(book);
+}
+
+
+Bu çalışır ✔
+Ama:
+
+Aynı anda 100 kullanıcı gelirse
+
+100 thread DB cevabı bekler
+
+Thread pool dolar
+
+Performans düşer
+
+Async hali:
+
+100 istek gelir
+
+DB beklerken thread’ler serbest
+
+Aynı donanımda daha fazla kullanıcıya cevap
+
+7️⃣ Neden Web API’de async çok önemli?
+
+Çünkü:
+
+Web API = IO ağırlıklı (DB, network)
+
+CPU değil, bekleme süresi problemi var
+
+Async = bekleme süresini verimli kullanma
+
+📌 Async hızlandırmaz
+📌 Async ölçeklenebilirlik sağlar
+
+8️⃣ “Ben await yazmazsam ne olur?”
+var bookTask = _context.Books.FindAsync(id);
+return Ok(bookTask);
+
+
+❌ Yanlış
+Çünkü:
+
+bookTask bir Task
+
+Sonuç değil
+
+Ya await edeceksin
+Ya da metodu async yazmayacaksın
+
+9️⃣ Kafanda oturması için mini özet 🧠
+Şu kavramları net ayır:
+Kavram	Anlam
+Task	Devam eden iş
+async	Bu metotta await olacak
+await	İş bitene kadar bekle (bloklama yok)
+Find	Senkron DB erişimi
+FindAsync	Asenkron DB erişimi
+🔑 Altın cümle (bunu unutma)
+
+ASP.NET Core’da async, “daha hızlı” değil, “daha çok kullanıcıya dayanıklı” demektir.
+
+Bir sonraki adım olarak istersen:
+
+async void neden kötü?
+
+ConfigureAwait(false) nedir?
+
+IQueryable + async nasıl çalışır?
+
+Controller mı Service mi async olmalı?
+
+Hangisinden devam edelim?

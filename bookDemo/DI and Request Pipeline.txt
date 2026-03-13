@@ -1,0 +1,184 @@
+1) Senin kurduğun yapı ne anlama geliyor
+✅ RepositoryContext  DbContext
+
+DbContext = EF Core’un veritabanı ile konuştuğu ana sınıf.
+
+RepositoryContext  DbContext yaptığında
+
+EF Core’a “benim veritabanı oturumumbağlantı yönetimim bu sınıf üzerinden olacak” diyorsun.
+
+İçinde DbSetBook gibi tabloları temsil eden property’ler olur.
+
+✅ Program.cs’te AddDbContext ile kayıt
+
+Sen Program.cs’te şunu yapınca (mantık olarak)
+
+builder.Services.AddDbContextRepositoryContext(...);
+
+
+şunu demiş oluyorsun
+
+“DI container (servis konteyneri) içinde, biri RepositoryContext isterse ben bunu nasıl oluşturacağımı biliyorum
+connection string budur, provider SQL Server’dır, yaşam süresi (lifetime) şudur…”
+
+Bu kayıt mekanizmanın kalbi.
+
+2) Controller constructor’ına RepositoryContext istemek neden DI
+
+Controller’da
+
+private readonly RepositoryContext _context;
+
+ve constructor
+
+public BooksController(RepositoryContext context) { _context = context; }
+
+Bu şu demek
+
+“Ben (BooksController) çalışabilmek için bir RepositoryContext’e bağımlıyım.
+Bunu ben new’leyip oluşturmayacağım, dışarıdan verilecek.”
+
+Bu “bağımlılığı dışarıdan alma” = Dependency Injection.
+
+3) Asıl soru “GET isteğinde ben parametre vermiyorum, RepositoryContext nereden geliyor”
+
+Burada olay şu
+
+🔥 RepositoryContext’i sen URL ile göndermiyorsun.
+
+RepositoryContext
+
+HTTP request’in parçası değil
+
+Querystring değil
+
+Body değil
+
+Route parametresi değil
+
+RepositoryContext, sunucu tarafında, ASP.NET Core’un DI sistemi tarafından otomatik oluşturulup veriliyor.
+
+4) GET isteği geldiğinde adım adım ne olur
+
+Aşağıdaki akış çok önemli
+
+1️⃣ İstek gelir
+
+TarayıcıPostman
+
+GET apibooks
+
+
+Kestrel (web server) bu isteği ASP.NET Core pipeline’a verir.
+
+2️⃣ Routing (yönlendirme) devreye girer
+
+Sen Program.cs’te app.MapControllers() dediğin için
+
+ASP.NET Core, “bu URL hangi controller + hangi action” diye bakar.
+
+Örneğin
+
+apibooks → BooksController içindeki [HttpGet] action.
+
+3️⃣ Controller instance’ı oluşturulacak
+
+ASP.NET Core şunu yapar
+
+“BooksController çalışacak. Ben bunun bir örneğini (instance) oluşturmalıyım.”
+
+Ama ASP.NET Core bunu new BooksController(...) diye direkt yapmaz.
+
+Bunu yapan mekanizma
+✅ Controller Activator  DI Container
+
+Yani Controller’ı da DI ile oluşturur.
+
+4️⃣ DI Container constructor’ı “çözer”
+
+BooksController constructor’ına bakar
+
+public BooksController(RepositoryContext context)
+
+
+ve der ki
+
+“Bu controller oluşturulurken RepositoryContext lazım.
+DI container’da RepositoryContext kayıtlı mı”
+
+Sen AddDbContextRepositoryContext() yaptığın için cevap ✅ EVET.
+
+5️⃣ DI container RepositoryContext’i oluşturur
+
+AddDbContext kayıt ettiği için container şunu yapabilir
+
+connection string’i config’den alır (appsettings.json)
+
+SQL Server provider’ını kullanır
+
+RepositoryContext örneğini üretir
+
+Bu örnek genelde Scoped lifetime ile üretilir (birazdan açıklayacağım).
+
+6️⃣ Controller oluşturulur
+
+Artık DI container elinde RepositoryContext var.
+
+Şunu yapar
+
+var controller = new BooksController(createdRepositoryContext);
+
+
+Sonra constructor çalışır
+
+_context = context;
+
+7️⃣ Action (GET metodu) çalışır
+
+Sonra [HttpGet] metodu çağrılır, _context hazırdır.
+
+8️⃣ Response döner, request biter
+
+Request bittiğinde
+
+Eğer RepositoryContext scoped ise,
+
+o request’e ait context dispose edilir (temizlenir).
+
+5) “Bu mekanizma nerede sağlanıyor” (tam adres)
+✅ DI Container
+
+builder.Services... satırlarıyla oluşturduğun kayıtlar
+
+builder.Build() ile uygulama ayağa kalkarken DI container oluşur
+
+✅ Controller’ı DI üzerinden üretme
+
+builder.Services.AddControllers() dediğinde,
+ASP.NET Core MVC sistemi devreye girer.
+
+Bu sistem controller’ları Activator + DI ile oluşturur.
+
+Sen bu noktada “RepositoryContext’i parametre olarak vermedim” diyorsun ya
+
+Çünkü parametreyi veren kişi sen değil, framework.
+
+6) Neden AddDbContext “Scoped” önemli
+
+AddDbContext varsayılan olarak genelde şu mantıkla çalışır
+
+Scoped = “her HTTP request için 1 DbContext instance”
+
+Bu şu anlama gelir
+
+Aynı request boyunca aynı DbContext kullanılır
+
+Request bitince DbContext dispose edilir
+
+Bu hem performans hem de transactionconsistency açısından doğru yaklaşımdır.
+
+7) Kafandaki “kim new’liyor” sorusunun net cevabı
+
+✅ BooksController’ı new’leyen ASP.NET Core (MVC altyapısı)
+✅ RepositoryContext’i new’leyen ASP.NET Core DI Container
+✅ Sen sadece kuralı tanımlıyorsun AddDbContext ile “nasıl üretileceğini” söylüyorsun
