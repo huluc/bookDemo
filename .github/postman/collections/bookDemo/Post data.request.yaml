@@ -1,0 +1,18 @@
+$kind: http-request
+name: Post data
+method: POST
+url: '{{baseURL}}/api/books'
+order: 2000
+description: "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"Title":"{{$randomWord}}", "Price": {{$randomPrice}}}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Successful POST request", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });

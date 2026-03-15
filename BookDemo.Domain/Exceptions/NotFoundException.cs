@@ -4,9 +4,14 @@ using System.Text;
 
 namespace BookDemo.Domain.Exceptions
 {
-    public class NotFoundException : Exception
+    public abstract class NotFoundException : Exception
     {
-        public NotFoundException(string message) : base(message) { }
+        protected NotFoundException(string message) : base(message) { }
+    }
 
+    public sealed class BookNotFoundException : NotFoundException
+    {
+        public BookNotFoundException(int id) 
+            : base($"Book with id {id} was not found.") { }
     }
 }
