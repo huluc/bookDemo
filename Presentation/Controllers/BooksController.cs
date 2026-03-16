@@ -43,7 +43,7 @@ namespace BookDemo.Presentation.Controllers
         public IActionResult GetBookById([FromRoute(Name = "id")] int id)
         {
             var book = _services.BookService.GetBookById(id);
-            return book is null ? NotFound() : Ok(book);
+            return Ok(book);
 
         }
         [HttpPost]
@@ -61,21 +61,20 @@ namespace BookDemo.Presentation.Controllers
         public IActionResult UpdateBook([FromRoute] int id, [FromBody] Book book)
         {
 
-            if (book is null || id != book.Id)
+            if (book is null)
+                return BadRequest("Book cannot be null");
+
+            if (id != book.Id)
                 return BadRequest("Book ID mismatch");
 
-            var ok = _services.BookService.UpdateBook(id, book);
-            return ok ? NoContent() : NotFound();
+            _services.BookService.UpdateBook(id, book);
+            return NoContent();
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult DeleteBook([FromRoute] int id)
         {
             var ok = _services.BookService.DeleteBook(id);
-
-            return ok ? NoContent() : NotFound();
-
-
             return NoContent(); // 204
         }
 
@@ -87,9 +86,7 @@ namespace BookDemo.Presentation.Controllers
                 return BadRequest("Book patch cannot be null");
 
             var book = _services.BookService.GetBookById(id);
-            if (book is null)
-                return NotFound();
-
+           
             // Apply patch and collect JSON Patch errors into ModelState
             bookPatch.ApplyTo(book, ModelState);
 

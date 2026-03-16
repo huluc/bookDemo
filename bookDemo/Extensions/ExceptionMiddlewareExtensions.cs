@@ -90,8 +90,8 @@ namespace BookDemo.API.Extensions
         private static (int StatusCode, string message) MapException(Exception exception) =>
             exception switch
             {
-                NotFoundException => (StatusCodes.Status404NotFound, exception.Message),
-                BadRequestException => (StatusCodes.Status400BadRequest, exception.Message),
+                NotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
+                BadRequestException ex=> (StatusCodes.Status400BadRequest, ex.Message),
                 _ => (StatusCodes.Status500InternalServerError, "Unexpected server error.")
             };
     }

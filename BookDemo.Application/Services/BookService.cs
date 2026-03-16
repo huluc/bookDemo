@@ -1,4 +1,5 @@
 ﻿using BookDemo.Application.Contracts;
+using BookDemo.Domain.Exceptions;
 using Entities.Models;
 using Microsoft.Extensions.Logging;
 using System;
@@ -57,13 +58,14 @@ namespace BookDemo.Application.Services
             _logger.LogDebug("Fetching book by Id={BookId}", id);
 
             // Read-only operation → tracking disabled
-            // Returns null if not found (controller decides how to respond)
+            // Throws BookNotFoundException if the book does not exist.
+            // The global exception handler converts it to HTTP 404.
             var book = _manager.Books.GetById(id, false);
 
             if (book is null)
             {
                 _logger.LogWarning("Book not found. Id={BookId}", id);
-                return null;
+                throw new BookNotFoundException(id);
             }
 
             if (_logger.IsEnabled(LogLevel.Debug))
@@ -109,10 +111,10 @@ namespace BookDemo.Application.Services
                 _logger.LogWarning("Book update failed due to ID mismatch. RouteId={RouteId}, BodyId={BodyId}",
                     id, book?.Id);
 
-                throw new ArgumentException("Book ID mismatch");
+                throw new BadRequestException("Book ID mismatch.");
             }
 
-                     if (_logger.IsEnabled(LogLevel.Debug))
+            if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("UpdateBook payload {@Book}", book);
 
 
@@ -122,7 +124,7 @@ namespace BookDemo.Application.Services
             if (existingBook is null)
             {
                 _logger.LogWarning("Update failed. Book not found. Id={BookId}", id);
-                return false;
+                throw new BookNotFoundException(id);
             }
 
             if (_logger.IsEnabled(LogLevel.Debug))
@@ -153,7 +155,7 @@ namespace BookDemo.Application.Services
             if (book is null)
             {
                 _logger.LogWarning("Delete failed. Book not found. Id={BookId}", id);
-                return false;
+                throw new BookNotFoundException(id);
             }
 
             _manager.Books.Delete(book);
