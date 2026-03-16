@@ -7,7 +7,6 @@ namespace BookDemo.Domain.Exceptions
     public abstract class NotFoundException : Exception
     {
         protected NotFoundException(string message) : base(message) { }
-
     }
 
     public sealed class BookNotFoundException : NotFoundException
@@ -15,5 +14,4 @@ namespace BookDemo.Domain.Exceptions
         public BookNotFoundException(int id) 
             : base($"Book with id {id} was not found.") { }
     }
-
 }
