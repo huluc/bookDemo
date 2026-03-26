@@ -1,4 +1,5 @@
-﻿using BookDemo.Application.Contracts;
+﻿using AutoMapper;
+using BookDemo.Application.Contracts;
 using BookDemo.Application.Services;
 using Microsoft.Extensions.Logging;
 using System;
@@ -31,7 +32,7 @@ namespace BookDemo.Infrastructure.Services
         /// Usually depends on IRepositoryManager, because
         /// services coordinate repositories to perform business logic.
         /// </summary>
-        public ServiceManager(IRepositoryManager repositoryManager, ILogger<BookService> loggerService)
+        public ServiceManager(IRepositoryManager repositoryManager, ILogger<BookService> loggerService, IMapper mapper)
         {
             if (repositoryManager is null)
                 throw new ArgumentNullException(nameof(repositoryManager));
@@ -39,7 +40,7 @@ namespace BookDemo.Infrastructure.Services
             // BookService is created lazily and receives
             // the shared repository manager.
             _bookService = new Lazy<IBookService>(
-                () => new BookService(repositoryManager,loggerService )
+                () => new BookService(repositoryManager, loggerService, mapper)
             );
         }
         /// <summary>

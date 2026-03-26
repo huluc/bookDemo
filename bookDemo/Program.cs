@@ -1,5 +1,6 @@
 using BookDemo.API.Extensions;
 using BookDemo.Application.Contracts;
+using BookDemo.Application.Mapping;
 using BookDemo.Infrastructure.Persistence;
 using BookDemo.Infrastructure.Repositories;
 using BookDemo.Infrastructure.Services;
@@ -28,7 +29,8 @@ builder.Services.AddOpenApi();
 builder.Services
     .ConfigureSqlContext(builder.Configuration)
     .ConfigureRepositoryManager()
-    .ConfigureServiceManager();
+    .ConfigureServiceManager()
+    .AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
 
 
 var app = builder.Build();
