@@ -1,4 +1,7 @@
-﻿using BookDemo.Application.Contracts;
+﻿using AutoMapper;
+using BookDemo.Application.Contracts;
+using BookDemo.Application.DTOs;
+
 using BookDemo.Domain.Exceptions;
 using Entities.Models;
 using Microsoft.Extensions.Logging;
@@ -30,14 +33,16 @@ namespace BookDemo.Application.Services
     {
         protected IRepositoryManager _manager;
         private readonly ILogger<BookService> _logger;
+        private readonly IMapper _mapper;
         /// <summary>
         /// IRepositoryManager is injected from DI container.
         /// This gives access to repositories + Save() (Unit of Work).
         /// </summary>
-        public BookService(IRepositoryManager manager, ILogger<BookService> logger)
+        public BookService(IRepositoryManager manager, ILogger<BookService> logger, IMapper mapper)
         {
             _manager = manager;
             _logger = logger;
+            _mapper = mapper;
         }
 
         public IEnumerable<Book> GetBooks()
@@ -102,20 +107,20 @@ namespace BookDemo.Application.Services
             return book;
 
         }
-        public bool UpdateBook(int id, Book book)
+        public void UpdateBook(int id, BookForUpdateDto bookDto)
         {
 
             // ID mismatch is a business rule violation
-            if (book is null || id != book.Id)
+            if (bookDto is null)
             {
-                _logger.LogWarning("Book update failed due to ID mismatch. RouteId={RouteId}, BodyId={BodyId}",
-                    id, book?.Id);
+                _logger.LogWarning("Book update failed because payload is null. RouteId={RouteId}",
+                    id);
 
-                throw new BadRequestException("Book ID mismatch.");
+                throw new BadRequestException("Book update payload is null.");
             }
 
             if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug("UpdateBook payload {@Book}", book);
+                _logger.LogDebug("UpdateBook payload {@Book}", bookDto);
 
 
             // Tracking ENABLED because we intend to modify the entity
@@ -130,10 +135,14 @@ namespace BookDemo.Application.Services
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("Book before update {@Book}", existingBook);
 
-            // Update only allowed fields
-            // (this prevents over-posting)
-            existingBook.Title = book.Title;
-            existingBook.Price = book.Price;
+            // Update only the incoming fields
+            //if(book.Title is not null)
+            //existingBook.Title = book.Title;
+
+            //if (book.Price.HasValue)
+            //    existingBook.Price = book.Price.Value;
+
+            _mapper.Map(bookDto, existingBook);
 
             // EF Core tracks changes automatically
             _manager.Save();
@@ -143,7 +152,6 @@ namespace BookDemo.Application.Services
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("Book after update {@Book}", existingBook);
 
-            return true;
         }
 
         public bool DeleteBook(int id)
@@ -166,6 +174,14 @@ namespace BookDemo.Application.Services
             return true;
         }
 
+        public BookForUpdateDto GetBookForPatch(int id)
+        {
+            var bookEntity = _manager.Books.GetById(id, trackChanges: false);
 
+            if (bookEntity is null)
+                throw new BookNotFoundException(id);
+
+            return _mapper.Map<BookForUpdateDto>(bookEntity);
+        }
     }
 }

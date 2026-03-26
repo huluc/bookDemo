@@ -1,4 +1,5 @@
-﻿using Entities.Models;
+﻿using BookDemo.Application.DTOs;
+using Entities.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -71,15 +72,13 @@ GetBookById yerine GetBook veya GetBookDetails*/
         /// Updates an existing book.
         /// Returns false if the book does not exist.
         /// </summary>
-        bool UpdateBook(int id, Book book);
+        void UpdateBook(int id, BookForUpdateDto book);
 
         /// <summary>
         /// Deletes a book by its identifier.
         /// Returns false if the book does not exist.
         /// </summary>
         bool DeleteBook(int id);
-
-
-
+        BookForUpdateDto GetBookForPatch(int id);
     }
 }
