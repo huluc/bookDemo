@@ -14,7 +14,7 @@ namespace BookDemo.Application.Mapping
             CreateMap<BookForUpdateDto, Book>()
                  .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
             CreateMap<Book, BookForUpdateDto>();
-
+            CreateMap<Book, BookDto>();
         }
     }
 }

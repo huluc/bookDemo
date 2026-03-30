@@ -18,7 +18,13 @@ builder.Host.UseNLog();
 
 // Add services to the container.
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+{
+    options.RespectBrowserAcceptHeader = true; // Respect the Accept header sent by clients
+    options.ReturnHttpNotAcceptable = true; // If the client requests an unsupported media type, return 406 Not Acceptable
+})
+    .AddCustomCsvFormatter()
+    .AddXmlDataContractSerializerFormatters()
     .AddNewtonsoftJson();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

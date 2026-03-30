@@ -45,17 +45,17 @@ namespace BookDemo.Application.Services
             _mapper = mapper;
         }
 
-        public IEnumerable<Book> GetBooks()
+        public IEnumerable<BookDto> GetBooks()
         {
             _logger.LogDebug("Fetching all books (tracking disabled)");
 
             // Read-only operation → tracking disabled
             // Improves performance and avoids unnecessary change tracking
-            var books = _manager.Books.GetAll(false);
+            var books = _manager.Books.GetAll(trackChanges: false);
+            var bookDtos = _mapper.Map<List<BookDto>>(books);
+            _logger.LogInformation("Fetched {Count} books successfully", bookDtos.Count);
 
-            _logger.LogInformation("Fetched books successfully");
-
-            return books;
+            return bookDtos;
         }
 
         public Book? GetBookById(int id)
