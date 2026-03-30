@@ -59,7 +59,7 @@ GetBookById yerine GetBook veya GetBookDetails*/
         /// Returns all books (read-only).
         /// Tracking is disabled internally for performance.
         /// </summary>
-        IEnumerable<Book> GetBooks();
+        IEnumerable<BookDto> GetBooks();
         Book GetBookById(int id);
 
         /// <summary>
