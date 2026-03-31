@@ -58,7 +58,7 @@ namespace BookDemo.Application.Services
             return bookDtos;
         }
 
-        public Book? GetBookById(int id)
+        public BookDto GetBookById(int id)
         {
             _logger.LogDebug("Fetching book by Id={BookId}", id);
 
@@ -78,23 +78,25 @@ namespace BookDemo.Application.Services
 
             _logger.LogInformation("Book fetched successfully. Id={BookId}", id);
 
-            return book;
+            var bookDto  = _mapper.Map<BookDto>(book);
+            return bookDto;
         }
-        public Book CreateBook(Book book)
+        public BookDto CreateBook(BookForCreationDto bookDto)
         {
-            if (book is null)
+            if (bookDto is null)
             {
                 _logger.LogWarning("CreateBook was called with null book");
-                throw new ArgumentNullException(nameof(book));
+                throw new ArgumentNullException(nameof(bookDto));
             }
 
             // Debug: gelen payload'u görmek (state inspection)
             if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug("CreateBook payload {@Book}", book);
+                _logger.LogDebug("CreateBook payload {@Book}", bookDto);
 
             _logger.LogInformation("Creating new book. Title={Title}, Price={Price}",
-           book.Title, book.Price);
+           bookDto.Title, bookDto.Price);
 
+             var book = _mapper.Map<Book>(bookDto);
             // Repository-level add
             _manager.Books.Add(book);
 
@@ -104,7 +106,7 @@ namespace BookDemo.Application.Services
             _logger.LogInformation("Book created successfully. Id={BookId}", book.Id);
 
             // Return created entity (Id is now populated)
-            return book;
+            return _mapper.Map<BookDto>(book);
 
         }
         public void UpdateBook(int id, BookForUpdateDto bookDto)

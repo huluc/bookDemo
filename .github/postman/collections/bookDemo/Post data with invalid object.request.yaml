@@ -1,8 +1,5 @@
 $kind: http-request
-name: Post data
-method: POST
-url: "{{baseURL}}/api/books"
-order: 3000
+name: Post data with invalid object
 description: >-
   This is a POST request, submitting data to an API via the request body. This
   request submits JSON data, and the data is reflected in the response.
@@ -10,6 +7,8 @@ description: >-
 
   A successful POST request typically returns a `200 OK` or `201 Created`
   response code.
+url: "{{baseURL}}/api/books"
+method: POST
 headers:
   - key: Content-Type
     value: application/json
@@ -21,3 +20,4 @@ scripts:
     code: pm.test("Successful POST request", function () {
       pm.expect(pm.response.code).to.be.oneOf([200, 201]); });
     language: text/javascript
+order: 2315
