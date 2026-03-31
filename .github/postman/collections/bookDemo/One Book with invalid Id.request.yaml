@@ -2,7 +2,7 @@ $kind: http-request
 name: One Book with invalid Id
 method: GET
 url: '{{baseURL}}/api/books/150'
-order: 6000
+order: 7000
 scripts:
   - type: afterResponse
     language: text/javascript

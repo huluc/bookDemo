@@ -60,13 +60,13 @@ GetBookById yerine GetBook veya GetBookDetails*/
         /// Tracking is disabled internally for performance.
         /// </summary>
         IEnumerable<BookDto> GetBooks();
-        Book GetBookById(int id);
+        BookDto GetBookById(int id);
 
         /// <summary>
         /// Creates a new Book entity and persists it.
         /// Throws exception if input is invalid.
         /// </summary>
-        Book CreateBook(Book book);
+        BookDto CreateBook(BookForCreationDto book);
 
         /// <summary>
         /// Updates an existing book.

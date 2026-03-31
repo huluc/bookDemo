@@ -48,13 +48,13 @@ namespace BookDemo.Presentation.Controllers
 
         }
         [HttpPost]
-        public IActionResult CreateBook([FromBody] Book book)
+        public IActionResult CreateBook([FromBody] BookForCreationDto bookDto)
         {
-            if (book is null)
+            if (bookDto is null)
 
                 return BadRequest("Book can not be null");
 
-            var created = _services.BookService.CreateBook(book);
+            var created = _services.BookService.CreateBook(bookDto);
             return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
 
         }

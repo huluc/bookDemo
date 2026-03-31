@@ -1,5 +1,0 @@
-$kind: http-request
-name: New Request
-method: PATCH
-url: '{{baseURL}}/api/books/1'
-order: 5000
