@@ -45,27 +45,27 @@ namespace BookDemo.Application.Services
             _mapper = mapper;
         }
 
-        public IEnumerable<BookDto> GetBooks()
+        public async Task<IEnumerable<BookDto>> GetBooksAsync()
         {
             _logger.LogDebug("Fetching all books (tracking disabled)");
 
             // Read-only operation → tracking disabled
             // Improves performance and avoids unnecessary change tracking
-            var books = _manager.Books.GetAll(trackChanges: false);
+            var books = await _manager.Books.GetAllAsync(trackChanges: false);
             var bookDtos = _mapper.Map<List<BookDto>>(books);
             _logger.LogInformation("Fetched {Count} books successfully", bookDtos.Count);
 
             return bookDtos;
         }
 
-        public BookDto GetBookById(int id)
+        public async Task<BookDto> GetBookByIdAsync(int id)
         {
             _logger.LogDebug("Fetching book by Id={BookId}", id);
 
             // Read-only operation → tracking disabled
             // Throws BookNotFoundException if the book does not exist.
             // The global exception handler converts it to HTTP 404.
-            var book = _manager.Books.GetById(id, false);
+            var book = await _manager.Books.GetByIdAsync(id, false);
 
             if (book is null)
             {
@@ -78,10 +78,10 @@ namespace BookDemo.Application.Services
 
             _logger.LogInformation("Book fetched successfully. Id={BookId}", id);
 
-            var bookDto  = _mapper.Map<BookDto>(book);
+            var bookDto = _mapper.Map<BookDto>(book);
             return bookDto;
         }
-        public BookDto CreateBook(BookForCreationDto bookDto)
+        public async Task<BookDto> CreateBookAsync(BookForCreationDto bookDto)
         {
             if (bookDto is null)
             {
@@ -96,12 +96,12 @@ namespace BookDemo.Application.Services
             _logger.LogInformation("Creating new book. Title={Title}, Price={Price}",
            bookDto.Title, bookDto.Price);
 
-             var book = _mapper.Map<Book>(bookDto);
+            var book = _mapper.Map<Book>(bookDto);
             // Repository-level add
             _manager.Books.Add(book);
 
             // Unit of Work commit
-            _manager.Save();
+            await _manager.SaveAsync();
 
             _logger.LogInformation("Book created successfully. Id={BookId}", book.Id);
 
@@ -109,7 +109,7 @@ namespace BookDemo.Application.Services
             return _mapper.Map<BookDto>(book);
 
         }
-        public void UpdateBook(int id, BookForUpdateDto bookDto)
+        public async Task UpdateBookAsync(int id, BookForUpdateDto bookDto)
         {
 
             // ID mismatch is a business rule violation
@@ -126,7 +126,7 @@ namespace BookDemo.Application.Services
 
 
             // Tracking ENABLED because we intend to modify the entity
-            var existingBook = _manager.Books.GetById(id, trackChanges: true);
+            var existingBook = await _manager.Books.GetByIdAsync(id, trackChanges: true);
 
             if (existingBook is null)
             {
@@ -147,7 +147,7 @@ namespace BookDemo.Application.Services
             _mapper.Map(bookDto, existingBook);
 
             // EF Core tracks changes automatically
-            _manager.Save();
+            await _manager.SaveAsync();
 
             _logger.LogInformation("Book updated successfully. Id={BookId}", id);
 
@@ -156,11 +156,11 @@ namespace BookDemo.Application.Services
 
         }
 
-        public bool DeleteBook(int id)
+        public async Task DeleteBookAsync(int id)
         {
             _logger.LogDebug("Attempting to delete book. Id={BookId}", id);
             // Tracking ENABLED because entity state will change to Deleted
-            var book = _manager.Books.GetById(id, trackChanges: true);
+            var book = await _manager.Books.GetByIdAsync(id, trackChanges: true);
 
             if (book is null)
             {
@@ -169,21 +169,27 @@ namespace BookDemo.Application.Services
             }
 
             _manager.Books.Delete(book);
-            _manager.Save();
+            await _manager.SaveAsync();
 
             _logger.LogInformation("Book deleted successfully. Id={BookId}", id);
-
-            return true;
         }
 
-        public BookForUpdateDto GetBookForPatch(int id)
+        public async Task<(BookForUpdateDto bookToPatch, Book bookEntity)> GetBookForPatchAsync(int id)
         {
-            var bookEntity = _manager.Books.GetById(id, trackChanges: false);
+            var bookEntity = await _manager.Books.GetByIdAsync(id, trackChanges: true);
 
             if (bookEntity is null)
                 throw new BookNotFoundException(id);
 
-            return _mapper.Map<BookForUpdateDto>(bookEntity);
+            var bookToPatch = _mapper.Map<BookForUpdateDto>(bookEntity);
+
+            return (bookToPatch, bookEntity);
+        }
+
+        public async Task SaveChangesForPathAsync(BookForUpdateDto bookToPatch, Book bookEntity)
+        {
+            _mapper.Map(bookToPatch, bookEntity);
+            await _manager.SaveAsync();
         }
     }
 }

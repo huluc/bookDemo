@@ -14,19 +14,26 @@ namespace BookDemo.Infrastructure.Repositories
         {
         }
 
-        public bool Exists(int id)
+        public async Task<bool> ExistsAsync(int id)
         {
-            return Set.AsNoTracking().Any(b => b.Id == id);
+            return await Set.AsNoTracking().AnyAsync(b => b.Id == id);
         }
 
-        public Book? GetById(int id, bool trackChanges)
+        public async Task<Book?> GetByIdAsync(int id, bool trackChanges)
         {
-            return trackChanges ? Set.Find(id) : Set.AsNoTracking().SingleOrDefault(b => b.Id == id);
+            if (trackChanges)
+                return await Set.FindAsync(id);
+            else
+                return await Set.AsNoTracking().SingleOrDefaultAsync(b => b.Id == id);
         }
 
-        public IReadOnlyList<Book> GetByTitleContains(string text)
+        public async Task<IReadOnlyList<Book>> GetByTitleContainsAsync(string text)
         {
-            throw new NotImplementedException(); //TODO: Implement this method
+            return await Set.
+                AsNoTracking()
+                .Where(b => b.Title.Contains(text))
+                .ToListAsync();
         }
+
     }
 }

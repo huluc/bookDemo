@@ -64,9 +64,7 @@ namespace BookDemo.Infrastructure.Repositories
         /// Persists all changes made through repositories
         /// to the database in a single transaction.
         /// </summary>
-        public void Save()
-        {
-            _context.SaveChanges();
-        }
+        public async Task SaveAsync() => await _context.SaveChangesAsync();
+
     }
 }

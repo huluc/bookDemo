@@ -34,69 +34,71 @@ namespace BookDemo.Presentation.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetBooks()
+        public async Task<IActionResult> GetBooks()
         {
-            var books = _services.BookService.GetBooks();
+            var books = await _services.BookService.GetBooksAsync();
             return Ok(books);
         }
 
         [HttpGet("{id:int}")]
-        public IActionResult GetBookById([FromRoute(Name = "id")] int id)
+        public async Task<IActionResult> GetBookById([FromRoute(Name = "id")] int id)
         {
-            var book = _services.BookService.GetBookById(id);
+            var book = await _services.BookService.GetBookByIdAsync(id);
             return Ok(book);
 
         }
         [HttpPost]
-        public IActionResult CreateBook([FromBody] BookForCreationDto bookDto)
+        public async Task<IActionResult> CreateBook([FromBody] BookForCreationDto bookDto)
         {
             if (bookDto is null)
-
                 return BadRequest("Book can not be null");
 
-            var created = _services.BookService.CreateBook(bookDto);
+            var created = await _services.BookService.CreateBookAsync(bookDto);
             return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
 
         }
         [HttpPut("{id:int}")]
-        public IActionResult UpdateBook([FromRoute] int id, [FromBody] BookForUpdateDto book)
+        public async Task<IActionResult> UpdateBook([FromRoute] int id, [FromBody] BookForUpdateDto book)
         {
 
             if (book is null)
                 return BadRequest("Book cannot be null");
 
-            _services.BookService.UpdateBook(id, book);
+            await _services.BookService.UpdateBookAsync(id, book);
             return NoContent();
         }
 
         [HttpDelete("{id:int}")]
-        public IActionResult DeleteBook([FromRoute] int id)
+        public async Task<IActionResult> DeleteBook([FromRoute] int id)
         {
-            var ok = _services.BookService.DeleteBook(id);
+            await _services.BookService.DeleteBookAsync(id);
             return NoContent(); // 204
         }
 
 
         [HttpPatch("{id:int}")]
-        public IActionResult PatchBook([FromRoute] int id, [FromBody] JsonPatchDocument<BookForUpdateDto> bookPatch)
+        public async Task<IActionResult> PatchBook([FromRoute] int id, [FromBody] JsonPatchDocument<BookForUpdateDto> bookPatch)
         {
             if (bookPatch is null)
                 return BadRequest("Book patch cannot be null");
 
-            var bookToPatch = _services.BookService.GetBookForPatch(id);
-           
+            var result = await _services.BookService.GetBookForPatchAsync(id);
+
+            var bookToPatch = result.bookToPatch;
+            var bookEntity = result.bookEntity;
+
             // Apply patch and collect JSON Patch errors into ModelState
             bookPatch.ApplyTo(bookToPatch, ModelState);
 
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
-            // Validate entity after patch (DataAnnotations etc.)
+            // Validate patched DTO after applying JSON Patch
             if (!TryValidateModel(bookToPatch))
                 return ValidationProblem(ModelState);
 
 
-            _services.BookService.UpdateBook(id, bookToPatch); // Update the entity in the data store
+            await _services.BookService.SaveChangesForPathAsync(bookToPatch, bookEntity); // Update the entity in the data store
 
             return NoContent(); // 204
         }

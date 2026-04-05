@@ -33,6 +33,6 @@ namespace BookDemo.Application.Contracts
         /// Commits all changes made through repositories
         /// in a single transaction.
         /// </summary>
-        void Save();
+        Task SaveAsync();
     }
 }

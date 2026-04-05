@@ -59,26 +59,27 @@ GetBookById yerine GetBook veya GetBookDetails*/
         /// Returns all books (read-only).
         /// Tracking is disabled internally for performance.
         /// </summary>
-        IEnumerable<BookDto> GetBooks();
-        BookDto GetBookById(int id);
+        Task<IEnumerable<BookDto>> GetBooksAsync();
+        Task<BookDto> GetBookByIdAsync(int id);
 
         /// <summary>
         /// Creates a new Book entity and persists it.
         /// Throws exception if input is invalid.
         /// </summary>
-        BookDto CreateBook(BookForCreationDto book);
+        Task<BookDto> CreateBookAsync(BookForCreationDto book);
 
         /// <summary>
         /// Updates an existing book.
         /// Returns false if the book does not exist.
         /// </summary>
-        void UpdateBook(int id, BookForUpdateDto book);
+        Task UpdateBookAsync(int id, BookForUpdateDto book);
 
         /// <summary>
         /// Deletes a book by its identifier.
         /// Returns false if the book does not exist.
         /// </summary>
-        bool DeleteBook(int id);
-        BookForUpdateDto GetBookForPatch(int id);
+        Task DeleteBookAsync(int id);
+        Task<(BookForUpdateDto bookToPatch, Book bookEntity)> GetBookForPatchAsync(int id);
+        Task SaveChangesForPathAsync(BookForUpdateDto bookToPatch, Book bookEntity);
     }
 }
