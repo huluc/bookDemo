@@ -1,5 +1,5 @@
 $kind: http-request
-name: Post data with invalid object
+name: Post data
 description: >-
   This is a POST request, submitting data to an API via the request body. This
   request submits JSON data, and the data is reflected in the response.

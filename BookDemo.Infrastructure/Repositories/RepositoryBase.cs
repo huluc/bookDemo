@@ -26,7 +26,10 @@ namespace BookDemo.Infrastructure.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public IReadOnlyList<T> GetAll(bool trackChanges) => trackChanges ? Set.ToList() : Set.AsNoTracking().ToList();
+        public async Task<IReadOnlyList<T>> GetAllAsync(bool trackChanges) =>
+            trackChanges
+                ? await Set.ToListAsync()
+                : await Set.AsNoTracking().ToListAsync();
 
 
         // -------------------------
@@ -37,13 +40,15 @@ namespace BookDemo.Infrastructure.Repositories
         /// Returns items matching the predicate.
         /// Default policy: NoTracking for performance (read-only query).
         /// </summary>
-        public IReadOnlyList<T> GetByCondition(Expression<Func<T, bool>> predicate, bool trackChanges)
+        public async Task<IReadOnlyList<T>> GetByConditionAsync(Expression<Func<T, bool>> predicate, bool trackChanges)
         {
             if (predicate is null)
                 throw new ArgumentNullException(nameof(predicate));
             var query = Set.Where(predicate);
 
-            return trackChanges ? query.ToList() : query.AsNoTracking().ToList();
+            return trackChanges
+                ? await query.ToListAsync()
+                : await query.AsNoTracking().ToListAsync();
         }
 
 
