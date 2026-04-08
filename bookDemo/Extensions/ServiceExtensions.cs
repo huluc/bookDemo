@@ -2,6 +2,7 @@
 using BookDemo.Infrastructure.Persistence;
 using BookDemo.Infrastructure.Repositories;
 using BookDemo.Infrastructure.Services;
+using BookDemo.Presentation.Filters;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookDemo.API.Extensions
@@ -30,6 +31,12 @@ namespace BookDemo.API.Extensions
             // Registers the ServiceManager as a scoped service for dependency injection.
             services.AddScoped<IServiceManager, ServiceManager>();
             return services; //enables method chaining by returning the IServiceCollection instance.
+        }
+
+        public static IServiceCollection ConfigureActionFilters(this IServiceCollection services)
+        {
+            services.AddScoped<LogActionAttribute>();
+            return services; 
         }
     }
 }
