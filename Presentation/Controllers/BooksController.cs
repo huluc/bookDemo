@@ -1,5 +1,6 @@
 ﻿using BookDemo.Application.Contracts;
 using BookDemo.Application.DTOs;
+using BookDemo.Presentation.Filters;
 using Entities.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,7 @@ namespace BookDemo.Presentation.Controllers
     // This separation keeps the host thin and allows the same Presentation layer
     // to be reused with different hosts if needed.
 
+    [ServiceFilter(typeof(LogActionAttribute))] // Apply validation filter to all actions in this controller
     [Route("api/[controller]")]
     [ApiController]
     public class BooksController : ControllerBase

@@ -4,6 +4,7 @@ using BookDemo.Application.Mapping;
 using BookDemo.Infrastructure.Persistence;
 using BookDemo.Infrastructure.Repositories;
 using BookDemo.Infrastructure.Services;
+using BookDemo.Presentation.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
 using NLog.Web;
@@ -36,6 +37,7 @@ builder.Services
     .ConfigureSqlContext(builder.Configuration)
     .ConfigureRepositoryManager()
     .ConfigureServiceManager()
+    .ConfigureActionFilters()
     .AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
 
 
