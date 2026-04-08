@@ -60,23 +60,10 @@ namespace BookDemo.Application.Services
 
         public async Task<BookDto> GetBookByIdAsync(int id)
         {
-            _logger.LogDebug("Fetching book by Id={BookId}", id);
-
             // Read-only operation → tracking disabled
             // Throws BookNotFoundException if the book does not exist.
             // The global exception handler converts it to HTTP 404.
-            var book = await _manager.Books.GetByIdAsync(id, false);
-
-            if (book is null)
-            {
-                _logger.LogWarning("Book not found. Id={BookId}", id);
-                throw new BookNotFoundException(id);
-            }
-
-            if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug("Book found {@Book}", book);
-
-            _logger.LogInformation("Book fetched successfully. Id={BookId}", id);
+            var book = await GetBookOrThrowAsync(id, false);
 
             var bookDto = _mapper.Map<BookDto>(book);
             return bookDto;
@@ -126,16 +113,7 @@ namespace BookDemo.Application.Services
 
 
             // Tracking ENABLED because we intend to modify the entity
-            var existingBook = await _manager.Books.GetByIdAsync(id, trackChanges: true);
-
-            if (existingBook is null)
-            {
-                _logger.LogWarning("Update failed. Book not found. Id={BookId}", id);
-                throw new BookNotFoundException(id);
-            }
-
-            if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug("Book before update {@Book}", existingBook);
+            var existingBook = await GetBookOrThrowAsync(id, trackChanges: true);
 
             // Update only the incoming fields
             //if(book.Title is not null)
@@ -160,13 +138,7 @@ namespace BookDemo.Application.Services
         {
             _logger.LogDebug("Attempting to delete book. Id={BookId}", id);
             // Tracking ENABLED because entity state will change to Deleted
-            var book = await _manager.Books.GetByIdAsync(id, trackChanges: true);
-
-            if (book is null)
-            {
-                _logger.LogWarning("Delete failed. Book not found. Id={BookId}", id);
-                throw new BookNotFoundException(id);
-            }
+            var book = await GetBookOrThrowAsync(id, trackChanges: true);
 
             _manager.Books.Delete(book);
             await _manager.SaveAsync();
@@ -176,10 +148,7 @@ namespace BookDemo.Application.Services
 
         public async Task<(BookForUpdateDto bookToPatch, Book bookEntity)> GetBookForPatchAsync(int id)
         {
-            var bookEntity = await _manager.Books.GetByIdAsync(id, trackChanges: true);
-
-            if (bookEntity is null)
-                throw new BookNotFoundException(id);
+            var bookEntity = await GetBookOrThrowAsync(id, trackChanges: true);
 
             var bookToPatch = _mapper.Map<BookForUpdateDto>(bookEntity);
 
@@ -191,5 +160,21 @@ namespace BookDemo.Application.Services
             _mapper.Map(bookToPatch, bookEntity);
             await _manager.SaveAsync();
         }
+        private async Task<Book> GetBookOrThrowAsync(int id, bool trackChanges)
+        {
+            _logger.LogDebug("Fetching book by Id={BookId}", id);
+            var book = await _manager.Books.GetByIdAsync(id, trackChanges);
+            if (book is null)
+            {
+                _logger.LogWarning("Book not found. Id={BookId}", id);
+                throw new BookNotFoundException(id);
+            }
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Book found {@Book}", book);
+
+            _logger.LogInformation("Book fetched successfully. Id={BookId}", id);
+            return book;
+        }
+
     }
 }
