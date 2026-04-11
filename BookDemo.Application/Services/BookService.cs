@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using BookDemo.Application.Contracts;
 using BookDemo.Application.DTOs;
-
+using BookDemo.Application.RequestFeatures;
 using BookDemo.Domain.Exceptions;
 using Entities.Models;
 using Microsoft.Extensions.Logging;
@@ -45,13 +45,13 @@ namespace BookDemo.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<BookDto>> GetBooksAsync()
+        public async Task<IEnumerable<BookDto>> GetBooksAsync(BookQueryParameters parameters)
         {
             _logger.LogDebug("Fetching all books (tracking disabled)");
 
             // Read-only operation → tracking disabled
             // Improves performance and avoids unnecessary change tracking
-            var books = await _manager.Books.GetAllAsync(trackChanges: false);
+            var books = await _manager.Books.GetBooksAsync(parameters, trackChanges: false);
             var bookDtos = _mapper.Map<List<BookDto>>(books);
             _logger.LogInformation("Fetched {Count} books successfully", bookDtos.Count);
 
