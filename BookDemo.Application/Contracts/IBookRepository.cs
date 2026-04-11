@@ -1,4 +1,5 @@
-﻿using Entities.Models;
+﻿using BookDemo.Application.RequestFeatures;
+using Entities.Models;
 namespace BookDemo.Application.Contracts
 {
     public interface IBookRepository:IRepositoryBase<Book>
@@ -20,5 +21,7 @@ namespace BookDemo.Application.Contracts
         /// Adjust/remove based on your needs.
         /// </summary>
         Task<IReadOnlyList<Book>> GetByTitleContainsAsync(string text);
+
+        Task<IReadOnlyList<Book>> GetBooksAsync(BookQueryParameters parameters, bool trackChanges);
     }
 }

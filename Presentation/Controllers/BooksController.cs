@@ -1,12 +1,9 @@
 ﻿using BookDemo.Application.Contracts;
 using BookDemo.Application.DTOs;
+using BookDemo.Application.RequestFeatures;
 using BookDemo.Presentation.Filters;
-using Entities.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BookDemo.Presentation.Controllers
 {
@@ -36,9 +33,9 @@ namespace BookDemo.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetBooks()
+        public async Task<IActionResult> GetBooks([FromQuery] BookQueryParameters parameters)
         {
-            var books = await _services.BookService.GetBooksAsync();
+            var books = await _services.BookService.GetBooksAsync(parameters);
             return Ok(books);
         }
 

@@ -1,9 +1,12 @@
 $kind: http-request
-name: Get data
+name: Get Books with Pagination
 method: GET
-url: "{{baseURL}}/api/books/1"
+url: "{{baseURL}}/api/books/?pageNumber=1&pageSize=3"
 headers:
   Accept: application/json
+queryParams:
+  pageNumber: "1"
+  pageSize: "3"
 order: 1000
 description: >-
   This is a GET request and it is used to "get" data from an endpoint. There is
