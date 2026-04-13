@@ -26,7 +26,7 @@ namespace BookDemo.API.Extensions
 
         }
 
-        public static IServiceCollection ConfigureServiceManager (this IServiceCollection services)
+        public static IServiceCollection ConfigureServiceManager(this IServiceCollection services)
         {
             // Registers the ServiceManager as a scoped service for dependency injection.
             services.AddScoped<IServiceManager, ServiceManager>();
@@ -36,7 +36,22 @@ namespace BookDemo.API.Extensions
         public static IServiceCollection ConfigureActionFilters(this IServiceCollection services)
         {
             services.AddScoped<LogActionAttribute>();
-            return services; 
+            return services;
         }
+        public static IServiceCollection ConfigureCors(this IServiceCollection services)
+        {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", builder =>
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .WithExposedHeaders("X-Pagination")
+                           );
+            });
+            return services;
+        }
+
+
     }
 }

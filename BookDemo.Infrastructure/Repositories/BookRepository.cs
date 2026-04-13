@@ -3,9 +3,6 @@ using BookDemo.Application.RequestFeatures;
 using BookDemo.Infrastructure.Persistence;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BookDemo.Infrastructure.Repositories
 {
@@ -20,16 +17,21 @@ namespace BookDemo.Infrastructure.Repositories
             return await Set.AsNoTracking().AnyAsync(b => b.Id == id);
         }
 
-        public async Task<IReadOnlyList<Book>> GetBooksAsync(BookQueryParameters parameters, bool trackChanges)
+        public async Task<PagedList<Book>> GetBooksAsync(BookQueryParameters parameters, bool trackChanges)
         {
+            ArgumentNullException.ThrowIfNull(parameters);
+
             IQueryable<Book> query = trackChanges ? Set : Set.AsNoTracking();
 
-           query = query
-                .OrderBy(b => b.Id)
-                .Skip((parameters.PageNumber - 1) * parameters.PageSize)
-                .Take(parameters.PageSize);
+            var count = await query.CountAsync();
 
-            return await query.ToListAsync();
+            var books = await query
+                 .OrderBy(b => b.Id)
+                 .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                 .Take(parameters.PageSize)
+                 .ToListAsync();
+
+            return new PagedList<Book>(books, count, parameters.PageNumber, parameters.PageSize);
         }
 
         public async Task<Book?> GetByIdAsync(int id, bool trackChanges)
