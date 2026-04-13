@@ -2,6 +2,7 @@
 using BookDemo.Application.DTOs;
 using BookDemo.Application.RequestFeatures;
 using BookDemo.Presentation.Filters;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,8 +36,15 @@ namespace BookDemo.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetBooks([FromQuery] BookQueryParameters parameters)
         {
-            var books = await _services.BookService.GetBooksAsync(parameters);
-            return Ok(books);
+            var pagedResult = await _services
+                .BookService
+                .GetBooksAsync(parameters);
+
+            Response.Headers.Append(
+                   "X-Pagination",
+                   System.Text.Json.JsonSerializer.Serialize(pagedResult.MetaData));
+
+            return Ok(pagedResult.Books);
         }
 
         [HttpGet("{id:int}")]

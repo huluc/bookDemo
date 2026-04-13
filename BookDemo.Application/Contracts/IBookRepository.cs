@@ -22,6 +22,6 @@ namespace BookDemo.Application.Contracts
         /// </summary>
         Task<IReadOnlyList<Book>> GetByTitleContainsAsync(string text);
 
-        Task<IReadOnlyList<Book>> GetBooksAsync(BookQueryParameters parameters, bool trackChanges);
+        Task<PagedList<Book>> GetBooksAsync(BookQueryParameters parameters, bool trackChanges);
     }
 }

@@ -38,6 +38,7 @@ builder.Services
     .ConfigureRepositoryManager()
     .ConfigureServiceManager()
     .ConfigureActionFilters()
+    .ConfigureCors()
     .AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
 
 
@@ -57,6 +58,8 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("CorsPolicy");
 
 app.UseAuthorization();
 

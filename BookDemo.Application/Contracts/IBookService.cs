@@ -60,7 +60,7 @@ GetBookById yerine GetBook veya GetBookDetails*/
         /// Returns all books (read-only).
         /// Tracking is disabled internally for performance.
         /// </summary>
-        Task<IEnumerable<BookDto>> GetBooksAsync(BookQueryParameters parameters);
+        Task<(IEnumerable<BookDto> Books, MetaData MetaData)> GetBooksAsync(BookQueryParameters parameters);
         Task<BookDto> GetBookByIdAsync(int id);
 
         /// <summary>

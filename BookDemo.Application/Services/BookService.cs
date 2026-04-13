@@ -45,17 +45,17 @@ namespace BookDemo.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<BookDto>> GetBooksAsync(BookQueryParameters parameters)
+        public async Task<(IEnumerable<BookDto> Books, MetaData MetaData)> GetBooksAsync(BookQueryParameters parameters)
         {
-            _logger.LogDebug("Fetching all books (tracking disabled)");
+            _logger.LogDebug("Fetching books page {PageNumber} with page size {PageSize} (tracking disabled)",
+    parameters.PageNumber, parameters.PageSize);
 
             // Read-only operation → tracking disabled
             // Improves performance and avoids unnecessary change tracking
-            var books = await _manager.Books.GetBooksAsync(parameters, trackChanges: false);
-            var bookDtos = _mapper.Map<List<BookDto>>(books);
-            _logger.LogInformation("Fetched {Count} books successfully", bookDtos.Count);
+            var pagedList = await _manager.Books.GetBooksAsync(parameters, trackChanges: false);
+            var bookDtos = _mapper.Map<List<BookDto>>(pagedList);
 
-            return bookDtos;
+            return (bookDtos, pagedList.MetaData);
         }
 
         public async Task<BookDto> GetBookByIdAsync(int id)
