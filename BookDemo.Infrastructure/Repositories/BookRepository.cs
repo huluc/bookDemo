@@ -1,6 +1,7 @@
 ﻿using BookDemo.Application.Contracts;
 using BookDemo.Application.RequestFeatures;
 using BookDemo.Infrastructure.Persistence;
+using BookDemo.Infrastructure.Repositories.Extensions;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +23,8 @@ namespace BookDemo.Infrastructure.Repositories
             ArgumentNullException.ThrowIfNull(parameters);
 
             IQueryable<Book> query = trackChanges ? Set : Set.AsNoTracking();
+
+            query = query.FilterBooks(parameters.MinPrice, parameters.MaxPrice);
 
             var count = await query.CountAsync();
 

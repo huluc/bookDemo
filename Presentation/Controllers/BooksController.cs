@@ -36,6 +36,10 @@ namespace BookDemo.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetBooks([FromQuery] BookQueryParameters parameters)
         {
+            // TODO: Move cross-property validation to model level via custom validation.
+            if (!parameters.ValidPriceRange)
+                return BadRequest("MaxPrice must be greater than or equal to MinPrice.");
+
             var pagedResult = await _services
                 .BookService
                 .GetBooksAsync(parameters);
