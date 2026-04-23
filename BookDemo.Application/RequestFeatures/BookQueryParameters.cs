@@ -22,5 +22,6 @@ namespace BookDemo.Application.RequestFeatures
         // after initial implementation. This will move validation responsibility to the model level
         // and keep controllers/services cleaner.
 
+        public string? SearchTerm { get; set; }
     }
 }
