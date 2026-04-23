@@ -24,7 +24,10 @@ namespace BookDemo.Infrastructure.Repositories
 
             IQueryable<Book> query = trackChanges ? Set : Set.AsNoTracking();
 
-            query = query.FilterBooks(parameters.MinPrice, parameters.MaxPrice);
+            query = query
+                .FilterBooks(parameters.MinPrice, parameters.MaxPrice)
+                .Search(parameters.SearchTerm);
+
 
             var count = await query.CountAsync();
 

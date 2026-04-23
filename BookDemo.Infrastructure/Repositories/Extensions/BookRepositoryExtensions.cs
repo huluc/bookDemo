@@ -15,5 +15,16 @@ namespace BookDemo.Infrastructure.Repositories.Extensions
                 books = books.Where(b => b.Price <= maxPrice.Value);
             return books;
         }
+
+        public static IQueryable<Book> Search(this IQueryable<Book> books, string? searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return books;
+
+            var lowerCaseTerm = searchTerm.Trim().ToLower();
+
+            return books.Where(b =>
+                   b.Title.ToLower().Contains(lowerCaseTerm));
+        }
     }
 }
