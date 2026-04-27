@@ -7,7 +7,7 @@ headers:
 queryParams:
   pageNumber: "1"
   pageSize: "3"
-order: 4000
+order: 5000
 description: >-
   This is a GET request and it is used to "get" data from an endpoint. There is
   no request body for a GET request, but you can use query parameters to help
