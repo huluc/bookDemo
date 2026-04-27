@@ -26,13 +26,13 @@ namespace BookDemo.Infrastructure.Repositories
 
             query = query
                 .FilterBooks(parameters.MinPrice, parameters.MaxPrice)
-                .Search(parameters.SearchTerm);
+                .Search(parameters.SearchTerm)
+                .Sort(parameters.OrderBy);
 
 
             var count = await query.CountAsync();
 
             var books = await query
-                 .OrderBy(b => b.Id)
                  .Skip((parameters.PageNumber - 1) * parameters.PageSize)
                  .Take(parameters.PageSize)
                  .ToListAsync();
