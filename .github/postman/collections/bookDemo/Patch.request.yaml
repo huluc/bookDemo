@@ -14,4 +14,4 @@ body:
 settings:
   disabledSystemHeaders:
     - content-type
-order: 9000
+order: 10000

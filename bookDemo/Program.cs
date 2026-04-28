@@ -39,6 +39,7 @@ builder.Services
     .ConfigureServiceManager()
     .ConfigureActionFilters()
     .ConfigureCors()
+    .ConfigureDataShaper()
     .AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
 
 

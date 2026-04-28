@@ -10,4 +10,4 @@ scripts:
     code: pm.test("Status code is 400", function () {
       pm.response.to.have.status(400); });
     language: text/javascript
-order: 11000
+order: 12000
