@@ -3,6 +3,7 @@ using BookDemo.Application.RequestFeatures;
 using Entities.Models;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Text;
 
 namespace BookDemo.Application.Contracts
@@ -60,7 +61,7 @@ GetBookById yerine GetBook veya GetBookDetails*/
         /// Returns all books (read-only).
         /// Tracking is disabled internally for performance.
         /// </summary>
-        Task<(IEnumerable<BookDto> Books, MetaData MetaData)> GetBooksAsync(BookQueryParameters parameters);
+        Task<(IEnumerable<ExpandoObject> Books, MetaData MetaData)> GetBooksAsync(BookQueryParameters parameters);
         Task<BookDto> GetBookByIdAsync(int id);
 
         /// <summary>

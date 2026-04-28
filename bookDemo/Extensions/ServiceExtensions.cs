@@ -1,4 +1,6 @@
 ﻿using BookDemo.Application.Contracts;
+using BookDemo.Application.DTOs;
+using BookDemo.Infrastructure.DataShaping;
 using BookDemo.Infrastructure.Persistence;
 using BookDemo.Infrastructure.Repositories;
 using BookDemo.Infrastructure.Services;
@@ -52,6 +54,10 @@ namespace BookDemo.API.Extensions
             return services;
         }
 
-
+        public static IServiceCollection ConfigureDataShaper(this IServiceCollection services)
+        {
+            services.AddScoped(typeof(IDataShaper<>), typeof(DataShaper<>));
+            return services;
+        }
     }
 }

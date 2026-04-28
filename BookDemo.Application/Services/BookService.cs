@@ -7,6 +7,7 @@ using Entities.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Text;
 
 namespace BookDemo.Application.Services
@@ -34,18 +35,21 @@ namespace BookDemo.Application.Services
         protected IRepositoryManager _manager;
         private readonly ILogger<BookService> _logger;
         private readonly IMapper _mapper;
+        private readonly IDataShaper<BookDto> _dataShaper;
+
         /// <summary>
         /// IRepositoryManager is injected from DI container.
         /// This gives access to repositories + Save() (Unit of Work).
         /// </summary>
-        public BookService(IRepositoryManager manager, ILogger<BookService> logger, IMapper mapper)
+        public BookService(IRepositoryManager manager, ILogger<BookService> logger, IMapper mapper, IDataShaper<BookDto> dataShaper)
         {
             _manager = manager;
             _logger = logger;
             _mapper = mapper;
+            _dataShaper = dataShaper;
         }
 
-        public async Task<(IEnumerable<BookDto> Books, MetaData MetaData)> GetBooksAsync(BookQueryParameters parameters)
+        public async Task<(IEnumerable<ExpandoObject> Books, MetaData MetaData)> GetBooksAsync(BookQueryParameters parameters)
         {
             _logger.LogDebug("Fetching books page {PageNumber} with page size {PageSize} (tracking disabled)",
     parameters.PageNumber, parameters.PageSize);
@@ -54,8 +58,9 @@ namespace BookDemo.Application.Services
             // Improves performance and avoids unnecessary change tracking
             var pagedList = await _manager.Books.GetBooksAsync(parameters, trackChanges: false);
             var bookDtos = _mapper.Map<List<BookDto>>(pagedList);
+            var shapedData = _dataShaper.ShapeData(bookDtos, parameters.Fields);
 
-            return (bookDtos, pagedList.MetaData);
+            return (shapedData, pagedList.MetaData);
         }
 
         public async Task<BookDto> GetBookByIdAsync(int id)
