@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BookDemo.Application.Contracts;
 using BookDemo.Application.DTOs;
+using BookDemo.Application.Models.LinkModels;
 using BookDemo.Application.RequestFeatures;
 using BookDemo.Domain.Exceptions;
 using Entities.Models;
@@ -32,35 +33,36 @@ namespace BookDemo.Application.Services
     /// </summary>
     public class BookService : IBookService
     {
-        protected IRepositoryManager _manager;
+        private readonly IRepositoryManager _manager;
         private readonly ILogger<BookService> _logger;
         private readonly IMapper _mapper;
-        private readonly IDataShaper<BookDto> _dataShaper;
+        private readonly IBookLinks _bookLinks;
 
         /// <summary>
         /// IRepositoryManager is injected from DI container.
         /// This gives access to repositories + Save() (Unit of Work).
         /// </summary>
-        public BookService(IRepositoryManager manager, ILogger<BookService> logger, IMapper mapper, IDataShaper<BookDto> dataShaper)
+        public BookService(IRepositoryManager manager, ILogger<BookService> logger, IMapper mapper, IBookLinks bookLinks)
         {
             _manager = manager;
             _logger = logger;
             _mapper = mapper;
-            _dataShaper = dataShaper;
+            _bookLinks = bookLinks;
         }
 
-        public async Task<(IEnumerable<ExpandoObject> Books, MetaData MetaData)> GetBooksAsync(BookQueryParameters parameters)
+        public async Task<(LinkResponse linkResponse, MetaData MetaData)> GetBooksAsync(LinkParameters parameters)
         {
             _logger.LogDebug("Fetching books page {PageNumber} with page size {PageSize} (tracking disabled)",
-    parameters.PageNumber, parameters.PageSize);
+    parameters.BookQueryParameters.PageNumber, parameters.BookQueryParameters.PageSize);
 
             // Read-only operation → tracking disabled
             // Improves performance and avoids unnecessary change tracking
-            var pagedList = await _manager.Books.GetBooksAsync(parameters, trackChanges: false);
+            var pagedList = await _manager.Books.GetBooksAsync(parameters.BookQueryParameters, trackChanges: false);
             var bookDtos = _mapper.Map<List<BookDto>>(pagedList);
-            var shapedData = _dataShaper.ShapeData(bookDtos, parameters.Fields);
 
-            return (shapedData, pagedList.MetaData);
+            var linkedBooks = _bookLinks.TryGenerateLinks(bookDtos, parameters);
+
+            return (linkResponse: linkedBooks, metaData: pagedList.MetaData);
         }
 
         public async Task<BookDto> GetBookByIdAsync(int id)
@@ -160,7 +162,7 @@ namespace BookDemo.Application.Services
             return (bookToPatch, bookEntity);
         }
 
-        public async Task SaveChangesForPathAsync(BookForUpdateDto bookToPatch, Book bookEntity)
+        public async Task SaveChangesForPatchAsync(BookForUpdateDto bookToPatch, Book bookEntity)
         {
             _mapper.Map(bookToPatch, bookEntity);
             await _manager.SaveAsync();

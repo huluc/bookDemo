@@ -33,7 +33,7 @@ namespace BookDemo.Infrastructure.Services
         /// Usually depends on IRepositoryManager, because
         /// services coordinate repositories to perform business logic.
         /// </summary>
-        public ServiceManager(IRepositoryManager repositoryManager, ILogger<BookService> loggerService, IMapper mapper, IDataShaper<BookDto> dataShaper)
+        public ServiceManager(IRepositoryManager repositoryManager, ILogger<BookService> loggerService, IMapper mapper, IBookLinks bookLinks)
         {
             if (repositoryManager is null)
                 throw new ArgumentNullException(nameof(repositoryManager));
@@ -41,7 +41,7 @@ namespace BookDemo.Infrastructure.Services
             // BookService is created lazily and receives
             // the shared repository manager.
             _bookService = new Lazy<IBookService>(
-                () => new BookService(repositoryManager, loggerService, mapper, dataShaper)
+                () => new BookService(repositoryManager, loggerService, mapper, bookLinks)
             );
         }
         /// <summary>

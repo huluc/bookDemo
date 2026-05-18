@@ -1,5 +1,7 @@
-﻿using BookDemo.Application.Contracts;
+﻿using BookDemo.Application.Constants;
+using BookDemo.Application.Contracts;
 using BookDemo.Application.DTOs;
+using BookDemo.Application.Models.LinkModels;
 using BookDemo.Application.RequestFeatures;
 using BookDemo.Presentation.Filters;
 using Microsoft.AspNetCore.Http;
@@ -33,32 +35,34 @@ namespace BookDemo.Presentation.Controllers
             _services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetBooks([FromQuery] BookQueryParameters parameters)
+        [HttpGet(Name = BookRoutes.GetAll)]
+        [ServiceFilter(typeof(ValidateMediaTypeAttribute))] // Apply media type validation filter to this action
+        public async Task<IActionResult> GetBooks([FromQuery] LinkParameters parameters)
         {
             // TODO: Move cross-property validation to model level via custom validation.
-            if (!parameters.ValidPriceRange)
+            if (!parameters.BookQueryParameters.ValidPriceRange)
                 return BadRequest("MaxPrice must be greater than or equal to MinPrice.");
 
-            var pagedResult = await _services
+            var result = await _services
                 .BookService
                 .GetBooksAsync(parameters);
 
             Response.Headers.Append(
                    "X-Pagination",
-                   System.Text.Json.JsonSerializer.Serialize(pagedResult.MetaData));
+                   System.Text.Json.JsonSerializer.Serialize(result.MetaData));
 
-            return Ok(pagedResult.Books);
+            return Ok(result.linkResponse.GetResult());
+
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = BookRoutes.GetById)]
         public async Task<IActionResult> GetBookById([FromRoute(Name = "id")] int id)
         {
             var book = await _services.BookService.GetBookByIdAsync(id);
             return Ok(book);
 
         }
-        [HttpPost]
+        [HttpPost(Name = BookRoutes.Create)]
         public async Task<IActionResult> CreateBook([FromBody] BookForCreationDto bookDto)
         {
             if (bookDto is null)
@@ -68,7 +72,7 @@ namespace BookDemo.Presentation.Controllers
             return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
 
         }
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:int}", Name = BookRoutes.Update)]
         public async Task<IActionResult> UpdateBook([FromRoute] int id, [FromBody] BookForUpdateDto book)
         {
 
@@ -79,7 +83,7 @@ namespace BookDemo.Presentation.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:int}", Name = BookRoutes.Delete)]
         public async Task<IActionResult> DeleteBook([FromRoute] int id)
         {
             await _services.BookService.DeleteBookAsync(id);
@@ -87,7 +91,7 @@ namespace BookDemo.Presentation.Controllers
         }
 
 
-        [HttpPatch("{id:int}")]
+        [HttpPatch("{id:int}", Name = BookRoutes.Patch)]
         public async Task<IActionResult> PatchBook([FromRoute] int id, [FromBody] JsonPatchDocument<BookForUpdateDto> bookPatch)
         {
             if (bookPatch is null)
@@ -109,7 +113,7 @@ namespace BookDemo.Presentation.Controllers
                 return ValidationProblem(ModelState);
 
 
-            await _services.BookService.SaveChangesForPathAsync(bookToPatch, bookEntity); // Update the entity in the data store
+            await _services.BookService.SaveChangesForPatchAsync(bookToPatch, bookEntity); // Update the entity in the data store
 
             return NoContent(); // 204
         }

@@ -1,4 +1,5 @@
 ﻿using BookDemo.Application.DTOs;
+using BookDemo.Application.Models.LinkModels;
 using BookDemo.Application.RequestFeatures;
 using Entities.Models;
 using System;
@@ -61,7 +62,7 @@ GetBookById yerine GetBook veya GetBookDetails*/
         /// Returns all books (read-only).
         /// Tracking is disabled internally for performance.
         /// </summary>
-        Task<(IEnumerable<ExpandoObject> Books, MetaData MetaData)> GetBooksAsync(BookQueryParameters parameters);
+        Task<(LinkResponse linkResponse, MetaData MetaData)> GetBooksAsync(LinkParameters parameters);
         Task<BookDto> GetBookByIdAsync(int id);
 
         /// <summary>
@@ -82,6 +83,6 @@ GetBookById yerine GetBook veya GetBookDetails*/
         /// </summary>
         Task DeleteBookAsync(int id);
         Task<(BookForUpdateDto bookToPatch, Book bookEntity)> GetBookForPatchAsync(int id);
-        Task SaveChangesForPathAsync(BookForUpdateDto bookToPatch, Book bookEntity);
+        Task SaveChangesForPatchAsync(BookForUpdateDto bookToPatch, Book bookEntity);
     }
 }
