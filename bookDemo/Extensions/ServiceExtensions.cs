@@ -5,6 +5,8 @@ using BookDemo.Infrastructure.Persistence;
 using BookDemo.Infrastructure.Repositories;
 using BookDemo.Infrastructure.Services;
 using BookDemo.Presentation.Filters;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookDemo.API.Extensions
@@ -38,6 +40,7 @@ namespace BookDemo.API.Extensions
         public static IServiceCollection ConfigureActionFilters(this IServiceCollection services)
         {
             services.AddScoped<LogActionAttribute>();
+            services.AddScoped<ValidateMediaTypeAttribute>();
             return services;
         }
         public static IServiceCollection ConfigureCors(this IServiceCollection services)
@@ -57,6 +60,46 @@ namespace BookDemo.API.Extensions
         public static IServiceCollection ConfigureDataShaper(this IServiceCollection services)
         {
             services.AddScoped(typeof(IDataShaper<>), typeof(DataShaper<>));
+            return services;
+        }
+        /// <summary>
+        /// Registers custom media types for the output formatters.
+        /// This allows the API to accept and process requests with custom Accept headers
+        /// such as 'application/vnd.hilal.bookdemo.hateoas+json' for HATEOAS support.
+        /// Without this registration, the framework would return 406 Not Acceptable
+        /// for any unrecognized media type.
+        /// </summary>
+        public static IServiceCollection AddCustomMediaTypes(this IServiceCollection services)
+        {
+            services.Configure<MvcOptions>(config =>
+            {
+                var systemTextJsonOutputFormatter = config.OutputFormatters
+                    .OfType<SystemTextJsonOutputFormatter>()?
+                    .FirstOrDefault();
+                if (systemTextJsonOutputFormatter != null)
+                {
+                    systemTextJsonOutputFormatter.SupportedMediaTypes.Add("application/vnd.hilal.bookdemo.hateoas+json");
+                }
+
+                var xmlOutputFormatter = config.OutputFormatters
+                .OfType<XmlDataContractSerializerOutputFormatter>()?
+                .FirstOrDefault();
+                if (xmlOutputFormatter != null)
+                {
+                    xmlOutputFormatter.SupportedMediaTypes.Add("application/vnd.hilal.bookdemo.hateoas+xml");
+                }
+
+                var newtonsoftOutputFormatter = config.OutputFormatters
+                .OfType<NewtonsoftJsonOutputFormatter>()?
+                .FirstOrDefault();
+
+                if (newtonsoftOutputFormatter != null)
+                {
+                    newtonsoftOutputFormatter.SupportedMediaTypes
+                        .Add("application/vnd.hilal.bookdemo.hateoas+json");
+                }
+            });
+
             return services;
         }
     }

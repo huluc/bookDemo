@@ -64,7 +64,7 @@ namespace BookDemo.API.Extensions
                     //Bu bir custom middleware class’ı değil.
                     //O yüzden burada constructor injection doğal olarak kullanılamaz.
                     //Bu yapıda logger gibi servisleri context.RequestServices üzerinden almak daha uygundur.
-
+                         
 
 
                   

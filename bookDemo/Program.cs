@@ -1,12 +1,7 @@
 using BookDemo.API.Extensions;
 using BookDemo.Application.Contracts;
 using BookDemo.Application.Mapping;
-using BookDemo.Infrastructure.Persistence;
-using BookDemo.Infrastructure.Repositories;
 using BookDemo.Infrastructure.Services;
-using BookDemo.Presentation.Filters;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.SqlServer;
 using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,8 +22,6 @@ builder.Services.AddControllers(options =>
     .AddCustomCsvFormatter()
     .AddXmlDataContractSerializerFormatters()
     .AddNewtonsoftJson();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
 // When RepositoryContext is requested, the DI container knows how to construct it:
 // it uses the configured connection string, the SQL Server provider,
@@ -40,6 +33,8 @@ builder.Services
     .ConfigureActionFilters()
     .ConfigureCors()
     .ConfigureDataShaper()
+    .AddCustomMediaTypes()
+    .AddScoped<IBookLinks, BookLinks>()
     .AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
 
 
