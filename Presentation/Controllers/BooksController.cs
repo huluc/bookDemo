@@ -35,6 +35,7 @@ namespace BookDemo.Presentation.Controllers
             _services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
+        [HttpHead]
         [HttpGet(Name = BookRoutes.GetAll)]
         [ServiceFilter(typeof(ValidateMediaTypeAttribute))] // Apply media type validation filter to this action
         public async Task<IActionResult> GetBooks([FromQuery] LinkParameters parameters)

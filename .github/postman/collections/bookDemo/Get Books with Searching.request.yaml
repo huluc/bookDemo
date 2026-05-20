@@ -21,4 +21,4 @@ scripts:
     code: pm.test("Status code is 200", function () {
       pm.response.to.have.status(200); });
     language: text/javascript
-order: 3000
+order: 4000
