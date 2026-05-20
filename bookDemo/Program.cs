@@ -31,7 +31,7 @@ builder.Services
     .ConfigureRepositoryManager()
     .ConfigureServiceManager()
     .ConfigureActionFilters()
-    .ConfigureCors()
+    .ConfigureCors(builder.Configuration)
     .ConfigureDataShaper()
     .AddCustomMediaTypes()
     .AddScoped<IBookLinks, BookLinks>()
