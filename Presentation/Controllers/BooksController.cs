@@ -118,5 +118,12 @@ namespace BookDemo.Presentation.Controllers
             return NoContent(); // 204
         }
 
+        [HttpOptions]
+        public IActionResult Options()
+        {
+            Response.Headers.Add("Allow", "GET, POST, PUT, DELETE, OPTIONS");
+            return Ok();
+        }
+
     }
 }

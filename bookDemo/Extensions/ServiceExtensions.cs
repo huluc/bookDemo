@@ -43,16 +43,26 @@ namespace BookDemo.API.Extensions
             services.AddScoped<ValidateMediaTypeAttribute>();
             return services;
         }
-        public static IServiceCollection ConfigureCors(this IServiceCollection services)
+        public static IServiceCollection ConfigureCors(this IServiceCollection services, IConfiguration configuration)
         {
+            // Reads the "AllowedOrigins" array from appsettings.json or appsettings.Development.json.
+            // In Development: localhost ports. In Production: real site URL
+            var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
             services.AddCors(options =>
             {
+                // Defines a CORS policy named "CorsPolicy".
+                // Activated in Program.cs via app.UseCors("CorsPolicy").
                 options.AddPolicy("CorsPolicy", builder =>
-                    builder.AllowAnyOrigin()
-                           .AllowAnyMethod()
-                           .AllowAnyHeader()
-                           .WithExposedHeaders("X-Pagination")
-                           );
+                    builder
+                        // Only allow requests from origins defined in AllowedOrigins.
+                        .WithOrigins(allowedOrigins!)
+                        // Allow all HTTP methods: GET, POST, PUT, DELETE, OPTIONS etc.
+                        .AllowAnyMethod()
+                        // Allow all headers: Content-Type, Authorization etc.
+                        .AllowAnyHeader()
+                        // Expose this header so frontend can read pagination metadata.
+                        .WithExposedHeaders("X-Pagination")
+                );
             });
             return services;
         }
