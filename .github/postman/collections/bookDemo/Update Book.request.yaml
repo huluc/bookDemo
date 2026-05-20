@@ -2,7 +2,7 @@ $kind: http-request
 name: Update Book
 method: PUT
 url: '{{baseURL}}/api/books/{{bookId}}'
-order: 8000
+order: 9000
 headers:
   - key: Content-Type
     value: application/json
