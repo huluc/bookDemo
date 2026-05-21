@@ -1,0 +1,10 @@
+$kind: http-request
+name: Root
+url: "{{baseUrl}}/api"
+method: GET
+headers:
+  Accept: application/vnd.hilal.bookdemo.apiroot+json
+settings:
+  disabledSystemHeaders:
+    - accept
+order: 1779362489984
