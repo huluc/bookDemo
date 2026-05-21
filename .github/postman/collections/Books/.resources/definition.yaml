@@ -1,4 +1,4 @@
 $kind: collection
-name: bookDemo
+name: Books
 variables:
   baseURL: ""

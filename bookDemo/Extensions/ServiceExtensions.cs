@@ -1,5 +1,5 @@
-﻿using BookDemo.Application.Contracts;
-using BookDemo.Application.DTOs;
+﻿using BookDemo.Application.Constants;
+using BookDemo.Application.Contracts;
 using BookDemo.Infrastructure.DataShaping;
 using BookDemo.Infrastructure.Persistence;
 using BookDemo.Infrastructure.Repositories;
@@ -47,7 +47,8 @@ namespace BookDemo.API.Extensions
         {
             // Reads the "AllowedOrigins" array from appsettings.json or appsettings.Development.json.
             // In Development: localhost ports. In Production: real site URL
-            var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
+            var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>()
+                ?? throw new InvalidOperationException("AllowedOrigins configuration is missing.");
             services.AddCors(options =>
             {
                 // Defines a CORS policy named "CorsPolicy".
@@ -84,29 +85,32 @@ namespace BookDemo.API.Extensions
             services.Configure<MvcOptions>(config =>
             {
                 var systemTextJsonOutputFormatter = config.OutputFormatters
-                    .OfType<SystemTextJsonOutputFormatter>()?
+                    .OfType<SystemTextJsonOutputFormatter>()
                     .FirstOrDefault();
                 if (systemTextJsonOutputFormatter != null)
                 {
-                    systemTextJsonOutputFormatter.SupportedMediaTypes.Add("application/vnd.hilal.bookdemo.hateoas+json");
+                    systemTextJsonOutputFormatter.SupportedMediaTypes.Add(MediaTypes.HateoasJson);
                 }
 
                 var xmlOutputFormatter = config.OutputFormatters
-                .OfType<XmlDataContractSerializerOutputFormatter>()?
+                .OfType<XmlDataContractSerializerOutputFormatter>()
                 .FirstOrDefault();
                 if (xmlOutputFormatter != null)
                 {
-                    xmlOutputFormatter.SupportedMediaTypes.Add("application/vnd.hilal.bookdemo.hateoas+xml");
+                    xmlOutputFormatter.SupportedMediaTypes.Add(MediaTypes.HateoasXml);
+                    xmlOutputFormatter.SupportedMediaTypes.Add(MediaTypes.ApiRootXml);
                 }
 
                 var newtonsoftOutputFormatter = config.OutputFormatters
-                .OfType<NewtonsoftJsonOutputFormatter>()?
+                .OfType<NewtonsoftJsonOutputFormatter>()
                 .FirstOrDefault();
 
                 if (newtonsoftOutputFormatter != null)
                 {
                     newtonsoftOutputFormatter.SupportedMediaTypes
-                        .Add("application/vnd.hilal.bookdemo.hateoas+json");
+                        .Add(MediaTypes.HateoasJson);
+                    newtonsoftOutputFormatter.SupportedMediaTypes
+                        .Add(MediaTypes.ApiRootJson);
                 }
             });
 
