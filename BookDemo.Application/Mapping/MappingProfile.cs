@@ -16,6 +16,7 @@ namespace BookDemo.Application.Mapping
             CreateMap<Book, BookForUpdateDto>();
             CreateMap<Book, BookDto>();
             CreateMap<BookForCreationDto, Book>();
+            CreateMap<Book, BookDtoV2>(); 
         }
     }
 }

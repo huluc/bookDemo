@@ -6,8 +6,8 @@ using System.Text;
 
 namespace BookDemo.Application.Contracts
 {
-    public interface IBookLinks
+    public interface IBookLinks<T>
     {
-        LinkResponse TryGenerateLinks(IEnumerable<BookDto> booksDto, LinkParameters linkParameters);
+        LinkResponse TryGenerateLinks(IEnumerable<T> booksDto, LinkParameters linkParameters);
     }
 }

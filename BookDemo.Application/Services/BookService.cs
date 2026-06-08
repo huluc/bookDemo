@@ -36,18 +36,20 @@ namespace BookDemo.Application.Services
         private readonly IRepositoryManager _manager;
         private readonly ILogger<BookService> _logger;
         private readonly IMapper _mapper;
-        private readonly IBookLinks _bookLinks;
+        private readonly IBookLinks<BookDto> _bookLinks;
+        private readonly IBookLinks<BookDtoV2> _bookLinksV2;
 
         /// <summary>
         /// IRepositoryManager is injected from DI container.
         /// This gives access to repositories + Save() (Unit of Work).
         /// </summary>
-        public BookService(IRepositoryManager manager, ILogger<BookService> logger, IMapper mapper, IBookLinks bookLinks)
+        public BookService(IRepositoryManager manager, ILogger<BookService> logger, IMapper mapper, IBookLinks<BookDto> bookLinks, IBookLinks<BookDtoV2> bookLinksV2)
         {
             _manager = manager;
             _logger = logger;
             _mapper = mapper;
             _bookLinks = bookLinks;
+            _bookLinksV2 = bookLinksV2;
         }
 
         public async Task<(LinkResponse linkResponse, MetaData MetaData)> GetBooksAsync(LinkParameters parameters)
@@ -61,6 +63,26 @@ namespace BookDemo.Application.Services
             var bookDtos = _mapper.Map<List<BookDto>>(pagedList);
 
             var linkedBooks = _bookLinks.TryGenerateLinks(bookDtos, parameters);
+
+            return (linkResponse: linkedBooks, metaData: pagedList.MetaData);
+        }
+
+        /// <summary>
+        /// V2 version of GetBooksAsync.
+        /// Maps to BookDtoV2 which includes the Author field introduced in V2.
+        /// </summary>
+        public async Task<(LinkResponse linkResponse, MetaData MetaData)> GetBooksV2Async(LinkParameters parameters)
+        {
+            _logger.LogDebug("Fetching books (V2) page {PageNumber} with page size {PageSize} (tracking disabled)",
+         parameters.BookQueryParameters.PageNumber, parameters.BookQueryParameters.PageSize);
+
+            // Read-only operation → tracking disabled
+            var pagedList = await _manager.Books.GetBooksAsync(parameters.BookQueryParameters, trackChanges: false);
+
+            // V2 — maps to BookDtoV2 which includes Author field
+            var bookDtos = _mapper.Map<List<BookDtoV2>>(pagedList);
+
+            var linkedBooks = _bookLinksV2.TryGenerateLinks(bookDtos, parameters);
 
             return (linkResponse: linkedBooks, metaData: pagedList.MetaData);
         }

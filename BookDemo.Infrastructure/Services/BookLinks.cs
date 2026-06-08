@@ -7,17 +7,18 @@ using Microsoft.Net.Http.Headers;
 using BookDemo.Application.RequestFeatures;
 using Microsoft.AspNetCore.SignalR;
 using BookDemo.Application.Constants;
+using System.Dynamic;
 
 namespace BookDemo.Infrastructure.Services
 {
-    public class BookLinks : IBookLinks
+    public class BookLinks<T> : IBookLinks<T>
     {
-        private readonly IDataShaper<BookDto> _dataShaper;
+        private readonly IDataShaper<T> _dataShaper;
         private readonly LinkGenerator _linkGenerator;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
 
-        public BookLinks(IDataShaper<BookDto> dataShaper, LinkGenerator linkGenerator, IHttpContextAccessor httpContextAccessor)
+        public BookLinks(IDataShaper<T> dataShaper, LinkGenerator linkGenerator, IHttpContextAccessor httpContextAccessor)
         {
             _dataShaper = dataShaper;
             _linkGenerator = linkGenerator;
@@ -25,7 +26,7 @@ namespace BookDemo.Infrastructure.Services
 
         }
 
-        public LinkResponse TryGenerateLinks(IEnumerable<BookDto> booksDto, LinkParameters linkParameters)
+        public LinkResponse TryGenerateLinks(IEnumerable<T> booksDto, LinkParameters linkParameters)
         {
             var shapedBooks = _dataShaper.ShapeData(booksDto, linkParameters.Fields);
             if (ShouldGenerateLinks())

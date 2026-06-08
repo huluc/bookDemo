@@ -5,71 +5,48 @@ using BookDemo.Application.DTOs;
 using BookDemo.Application.Models.LinkModels;
 using BookDemo.Application.RequestFeatures;
 using BookDemo.Presentation.Filters;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace BookDemo.Presentation.Controllers
 {
-    // We separated the Presentation layer from the Web API host project
-    // to clearly isolate HTTP and framework-related concerns.
-    //
-    // The Web API project is only responsible for starting the application
-    // (Program.cs, middleware configuration, dependency injection setup).
-    //
-    // The Presentation layer contains controllers and everything related to
-    // handling HTTP requests (routing, model binding, validation, ModelState, etc.).
-
-    // This separation keeps the host thin and allows the same Presentation layer
-    // to be reused with different hosts if needed.
-    
-    [ServiceFilter(typeof(LogActionAttribute))] // Apply validation filter to all actions in this controller
-    [ApiVersion("1.0")]
+    [ServiceFilter(typeof(LogActionAttribute))]
+    [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/books")]
     [ApiController]
-    public class BooksController : ControllerBase
+    public class BooksV2Controller : ControllerBase
     {
-
         private readonly IServiceManager _services;
 
-        public BooksController(IServiceManager services)
+        public BooksV2Controller(IServiceManager services)
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
         [HttpHead]
-        [HttpGet(Name = BookRoutes.GetAll)]
-        [MapToApiVersion("1.0")]
-
-        [ServiceFilter(typeof(ValidateMediaTypeAttribute))] // Apply media type validation filter to this action
-        // Marked as virtual to allow BooksV2Controller to override
-         // this method with V2-specific logic while inheriting all other actions.
+        [HttpGet(Name = BookRoutes.GetAllV2)]
+        [ServiceFilter(typeof(ValidateMediaTypeAttribute))]
         public async Task<IActionResult> GetBooks([FromQuery] LinkParameters parameters)
         {
-            // TODO: Move cross-property validation to model level via custom validation.
             if (!parameters.BookQueryParameters.ValidPriceRange)
                 return BadRequest("MaxPrice must be greater than or equal to MinPrice.");
 
-            var result = await _services
-                .BookService
-                .GetBooksAsync(parameters);
+            var result = await _services.BookService.GetBooksV2Async(parameters);
 
-            Response.Headers.Append(
-                   "X-Pagination",
-                   System.Text.Json.JsonSerializer.Serialize(result.MetaData));
+            Response.Headers["X-Pagination"] = JsonSerializer.Serialize(result.MetaData);
 
             return Ok(result.linkResponse.GetResult());
-
         }
 
-        [HttpGet("{id:int}", Name = BookRoutes.GetById)]
+        [HttpGet("{id:int}", Name = BookRoutes.GetByIdV2)]
         public async Task<IActionResult> GetBookById([FromRoute(Name = "id")] int id)
         {
             var book = await _services.BookService.GetBookByIdAsync(id);
             return Ok(book);
-
         }
-        [HttpPost(Name = BookRoutes.Create)]
+
+        [HttpPost(Name = BookRoutes.CreateV2)]
         public async Task<IActionResult> CreateBook([FromBody] BookForCreationDto bookDto)
         {
             if (bookDto is null)
@@ -77,12 +54,11 @@ namespace BookDemo.Presentation.Controllers
 
             var created = await _services.BookService.CreateBookAsync(bookDto);
             return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
-
         }
-        [HttpPut("{id:int}", Name = BookRoutes.Update)]
+
+        [HttpPut("{id:int}", Name = BookRoutes.UpdateV2)]
         public async Task<IActionResult> UpdateBook([FromRoute] int id, [FromBody] BookForUpdateDto book)
         {
-
             if (book is null)
                 return BadRequest("Book cannot be null");
 
@@ -90,39 +66,33 @@ namespace BookDemo.Presentation.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id:int}", Name = BookRoutes.Delete)]
+        [HttpDelete("{id:int}", Name = BookRoutes.DeleteV2)]
         public async Task<IActionResult> DeleteBook([FromRoute] int id)
         {
             await _services.BookService.DeleteBookAsync(id);
-            return NoContent(); // 204
+            return NoContent();
         }
 
-
-        [HttpPatch("{id:int}", Name = BookRoutes.Patch)]
+        [HttpPatch("{id:int}", Name = BookRoutes.PatchV2)]
         public async Task<IActionResult> PatchBook([FromRoute] int id, [FromBody] JsonPatchDocument<BookForUpdateDto> bookPatch)
         {
             if (bookPatch is null)
                 return BadRequest("Book patch cannot be null");
 
             var result = await _services.BookService.GetBookForPatchAsync(id);
-
             var bookToPatch = result.bookToPatch;
             var bookEntity = result.bookEntity;
 
-            // Apply patch and collect JSON Patch errors into ModelState
             bookPatch.ApplyTo(bookToPatch, ModelState);
 
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
-            // Validate patched DTO after applying JSON Patch
             if (!TryValidateModel(bookToPatch))
                 return ValidationProblem(ModelState);
 
-
-            await _services.BookService.SaveChangesForPatchAsync(bookToPatch, bookEntity); // Update the entity in the data store
-
-            return NoContent(); // 204
+            await _services.BookService.SaveChangesForPatchAsync(bookToPatch, bookEntity);
+            return NoContent();
         }
 
         [HttpOptions]
@@ -131,6 +101,5 @@ namespace BookDemo.Presentation.Controllers
             Response.Headers.Add("Allow", "GET, POST, PUT, DELETE, OPTIONS");
             return Ok();
         }
-
     }
 }

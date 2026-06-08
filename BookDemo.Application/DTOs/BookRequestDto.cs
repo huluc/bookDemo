@@ -15,5 +15,7 @@ namespace BookDemo.Application.DTOs
         [Required]
         [Range(10,1000)]
         public decimal Price { get; set; }
+
+        public string? Author { get; set; }
     }
 }
