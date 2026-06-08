@@ -1,4 +1,5 @@
-﻿using BookDemo.Application.Constants;
+﻿using Asp.Versioning;
+using BookDemo.Application.Constants;
 using BookDemo.Application.Contracts;
 using BookDemo.Infrastructure.DataShaping;
 using BookDemo.Infrastructure.Persistence;
@@ -73,6 +74,15 @@ namespace BookDemo.API.Extensions
             services.AddScoped(typeof(IDataShaper<>), typeof(DataShaper<>));
             return services;
         }
+
+        public static IServiceCollection ConfigureBookLinks(this IServiceCollection services)
+        {
+            // Open generic registration — works for BookLinks<BookDto>, BookLinks<BookDtoV2>, etc.
+            // No changes needed when new versions are introduced.
+            services.AddScoped(typeof(IBookLinks<>), typeof(BookLinks<>));
+            return services;
+        }
+
         /// <summary>
         /// Registers custom media types for the output formatters.
         /// This allows the API to accept and process requests with custom Accept headers
@@ -113,6 +123,28 @@ namespace BookDemo.API.Extensions
                         .Add(MediaTypes.ApiRootJson);
                 }
             });
+
+            return services;
+        }
+        /// <summary>
+        /// Configures API versioning for the application.
+        /// Default version is 1.0 and version is read from URL segment,
+        /// request header, or query string.
+        /// </summary>
+        public static IServiceCollection ConfigureVersioning(this IServiceCollection services)
+        {
+            services.AddApiVersioning(opt =>
+            {
+                opt.DefaultApiVersion = new ApiVersion(1, 0);
+                opt.AssumeDefaultVersionWhenUnspecified = true;
+                opt.ReportApiVersions = true;
+                opt.ApiVersionReader = ApiVersionReader.Combine(
+                    new UrlSegmentApiVersionReader(),
+                    new HeaderApiVersionReader("api-version"),
+                    new QueryStringApiVersionReader("api-version")
+                );
+            })
+            .AddMvc(); // ← controller'ların versiyonlama ile düzgün çalışması için gerekli
 
             return services;
         }

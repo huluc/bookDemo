@@ -1,0 +1,10 @@
+$kind: http-request
+name: One Book with invalid Id
+method: GET
+url: '{{baseURL}}/api/v2/books/150'
+order: 12000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 404", function () { pm.response.to.have.status(404); });

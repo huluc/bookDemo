@@ -33,9 +33,10 @@ builder.Services
     .ConfigureActionFilters()
     .ConfigureCors(builder.Configuration)
     .ConfigureDataShaper()
+    .ConfigureBookLinks()
     .AddCustomMediaTypes()
-    .AddScoped<IBookLinks, BookLinks>()
-    .AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
+    .AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly)
+    .ConfigureVersioning();
 
 
 var app = builder.Build();

@@ -63,6 +63,13 @@ GetBookById yerine GetBook veya GetBookDetails*/
         /// Tracking is disabled internally for performance.
         /// </summary>
         Task<(LinkResponse linkResponse, MetaData MetaData)> GetBooksAsync(LinkParameters parameters);
+
+        /// <summary>
+        /// Returns all books with author information for V2 API.
+        /// Extends GetBooksAsync by including the Author field introduced in V2.
+        /// V1 clients are not affected as they continue to use GetBooksAsync.
+        /// </summary>
+        Task<(LinkResponse linkResponse, MetaData MetaData)> GetBooksV2Async(LinkParameters parameters);
         Task<BookDto> GetBookByIdAsync(int id);
 
         /// <summary>
