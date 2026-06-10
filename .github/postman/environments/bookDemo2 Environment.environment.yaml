@@ -1,0 +1,6 @@
+name: bookDemo2 Environment
+values:
+  - key: baseURL
+    value: ''
+  - key: baseURL
+    value: ''

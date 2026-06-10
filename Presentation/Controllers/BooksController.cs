@@ -44,9 +44,14 @@ namespace BookDemo.Presentation.Controllers
         [ServiceFilter(typeof(ValidateMediaTypeAttribute))] // Apply media type validation filter to this action
         // Marked as virtual to allow BooksV2Controller to override
          // this method with V2-specific logic while inheriting all other actions.
-        public async Task<IActionResult> GetBooks([FromQuery] LinkParameters parameters)
+        public async Task<IActionResult> GetBooks([FromQuery] BookQueryParameters bookQueryParameters, [FromQuery] string? fields)
         {
+            // Manually construct LinkParameters to avoid [FromQuery] nested binding issue.
+            // ASP.NET model binder cannot bind nested objects from query strings directly.
+            var parameters = new LinkParameters(bookQueryParameters, fields);
+           
             // TODO: Move cross-property validation to model level via custom validation.
+
             if (!parameters.BookQueryParameters.ValidPriceRange)
                 return BadRequest("MaxPrice must be greater than or equal to MinPrice.");
 

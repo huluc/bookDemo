@@ -1,12 +1,12 @@
 $kind: http-request
 name: Get Books with Pagination
 method: GET
-url: "{{baseURL}}/api/v1/books/?pageNumber=2&pageSize=3"
+url: "{{baseURL}}/api/v1/books/?pageNumber=3&pageSize=2"
 headers:
   Accept: application/json
 queryParams:
-  pageNumber: "2"
-  pageSize: "3"
+  pageNumber: "3"
+  pageSize: "2"
 order: 7000
 description: |-
   This is a GET request and it is used to "get" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on.
