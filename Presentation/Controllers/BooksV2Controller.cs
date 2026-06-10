@@ -27,8 +27,12 @@ namespace BookDemo.Presentation.Controllers
         [HttpHead]
         [HttpGet(Name = BookRoutes.GetAllV2)]
         [ServiceFilter(typeof(ValidateMediaTypeAttribute))]
-        public async Task<IActionResult> GetBooks([FromQuery] LinkParameters parameters)
+        public async Task<IActionResult> GetBooks([FromQuery] BookQueryParameters bookQueryParameters, [FromQuery] string? fields)
         {
+            // Manually construct LinkParameters to avoid [FromQuery] nested binding issue.
+            // ASP.NET model binder cannot bind nested objects from query strings directly.
+            var parameters = new LinkParameters(bookQueryParameters, fields);
+
             if (!parameters.BookQueryParameters.ValidPriceRange)
                 return BadRequest("MaxPrice must be greater than or equal to MinPrice.");
 
