@@ -39,8 +39,6 @@ namespace BookDemo.Presentation.Controllers
 
         [HttpHead]
         [HttpGet(Name = BookRoutes.GetAll)]
-        [MapToApiVersion("1.0")]
-
         [ServiceFilter(typeof(ValidateMediaTypeAttribute))] // Apply media type validation filter to this action
         // Marked as virtual to allow BooksV2Controller to override
          // this method with V2-specific logic while inheriting all other actions.

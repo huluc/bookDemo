@@ -36,7 +36,7 @@ namespace BookDemo.Presentation.Controllers
             if (!parameters.BookQueryParameters.ValidPriceRange)
                 return BadRequest("MaxPrice must be greater than or equal to MinPrice.");
 
-            var result = await _services.BookService.GetBooksV2Async(parameters);
+            var result = await _services.BookServiceV2.GetBooksAsync(parameters);
 
             Response.Headers["X-Pagination"] = JsonSerializer.Serialize(result.MetaData);
 
@@ -46,7 +46,7 @@ namespace BookDemo.Presentation.Controllers
         [HttpGet("{id:int}", Name = BookRoutes.GetByIdV2)]
         public async Task<IActionResult> GetBookById([FromRoute(Name = "id")] int id)
         {
-            var book = await _services.BookService.GetBookByIdAsync(id);
+            var book = await _services.BookServiceV2.GetBookByIdAsync(id);
             return Ok(book);
         }
 
@@ -56,7 +56,7 @@ namespace BookDemo.Presentation.Controllers
             if (bookDto is null)
                 return BadRequest("Book can not be null");
 
-            var created = await _services.BookService.CreateBookAsync(bookDto);
+            var created = await _services.BookServiceV2.CreateBookAsync(bookDto);
             return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
         }
 
@@ -66,14 +66,14 @@ namespace BookDemo.Presentation.Controllers
             if (book is null)
                 return BadRequest("Book cannot be null");
 
-            await _services.BookService.UpdateBookAsync(id, book);
+            await _services.BookServiceV2.UpdateBookAsync(id, book);
             return NoContent();
         }
 
         [HttpDelete("{id:int}", Name = BookRoutes.DeleteV2)]
         public async Task<IActionResult> DeleteBook([FromRoute] int id)
         {
-            await _services.BookService.DeleteBookAsync(id);
+            await _services.BookServiceV2.DeleteBookAsync(id);
             return NoContent();
         }
 
@@ -83,7 +83,7 @@ namespace BookDemo.Presentation.Controllers
             if (bookPatch is null)
                 return BadRequest("Book patch cannot be null");
 
-            var result = await _services.BookService.GetBookForPatchAsync(id);
+            var result = await _services.BookServiceV2.GetBookForPatchAsync(id);
             var bookToPatch = result.bookToPatch;
             var bookEntity = result.bookEntity;
 
@@ -95,7 +95,7 @@ namespace BookDemo.Presentation.Controllers
             if (!TryValidateModel(bookToPatch))
                 return ValidationProblem(ModelState);
 
-            await _services.BookService.SaveChangesForPatchAsync(bookToPatch, bookEntity);
+            await _services.BookServiceV2.SaveChangesForPatchAsync(bookToPatch, bookEntity);
             return NoContent();
         }
 
