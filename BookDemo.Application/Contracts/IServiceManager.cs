@@ -17,8 +17,13 @@ namespace BookDemo.Application.Contracts
     public interface IServiceManager
     {
         /// <summary>
-        /// Exposes book-related business operations.
+        /// V1 book service — books without Author field.
         /// </summary>
-        IBookService BookService { get; }
+        V1.IBookService BookService { get; }
+
+        /// <summary>
+        /// V2 book service — books with Author field.
+        /// </summary>
+        V2.IBookService BookServiceV2 { get; }
     }
 }
