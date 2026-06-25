@@ -18,8 +18,8 @@ namespace BookDemo.API.Extensions
         {
             // Configures the DbContext to use SQL Server with the connection string from configuration.
             services.AddDbContext<RepositoryContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString("sqlConnection")));
+                options.UseSqlServer(configuration.GetConnectionString("sqlConnection"))
+                       .EnableSensitiveDataLogging());
             return services; //enables method chaining by returning the IServiceCollection instance.
 
         }
@@ -147,6 +147,11 @@ namespace BookDemo.API.Extensions
             .AddMvc(); // ← controller'ların versiyonlama ile düzgün çalışması için gerekli
 
             return services;
+        }
+
+        public static void ConfigureResponseCaching(this IServiceCollection services)
+        {
+            services.AddResponseCaching();
         }
     }
 }

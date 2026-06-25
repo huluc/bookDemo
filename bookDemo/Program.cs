@@ -2,6 +2,7 @@ using BookDemo.API.Extensions;
 using BookDemo.Application.Contracts;
 using BookDemo.Application.Mapping;
 using BookDemo.Infrastructure.Services;
+using Microsoft.AspNetCore.Mvc;
 using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,11 @@ builder.Services.AddControllers(options =>
 {
     options.RespectBrowserAcceptHeader = true; // Respect the Accept header sent by clients
     options.ReturnHttpNotAcceptable = true; // If the client requests an unsupported media type, return 406 Not Acceptable
+    options.CacheProfiles.Add("60SecondsDuration", new CacheProfile
+    {
+        Duration = 60,
+        VaryByQueryKeys = new[] { "*" }
+    });
 })
     .AddCustomCsvFormatter()
     .AddXmlDataContractSerializerFormatters()
@@ -36,7 +42,8 @@ builder.Services
     .ConfigureBookLinks()
     .AddCustomMediaTypes()
     .AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly)
-    .ConfigureVersioning();
+    .ConfigureVersioning()
+    .ConfigureResponseCaching(); 
 
 
 var app = builder.Build();
@@ -57,7 +64,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("CorsPolicy");
-
+app.UseResponseCaching();
 app.UseAuthorization();
 
 app.MapControllers();
