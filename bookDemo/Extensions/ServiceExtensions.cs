@@ -6,6 +6,7 @@ using BookDemo.Infrastructure.Persistence;
 using BookDemo.Infrastructure.Repositories;
 using BookDemo.Infrastructure.Services;
 using BookDemo.Presentation.Filters;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
@@ -149,9 +150,40 @@ namespace BookDemo.API.Extensions
             return services;
         }
 
-        public static void ConfigureResponseCaching(this IServiceCollection services)
+        /// <summary>
+        /// Registers the server-side response caching service.
+        /// Works at the HTTP layer — caches full responses in server memory.
+        /// Activated in the pipeline via app.UseResponseCaching().
+        /// </summary>
+        public static IServiceCollection ConfigureResponseCaching(this IServiceCollection services)
         {
             services.AddResponseCaching();
+            return services;
         }
-    }
+
+        /// <summary>
+        /// Configures HTTP cache headers using Marvin.Cache.Headers.
+        /// Works at the HTTP layer — writes Cache-Control, ETag, and Last-Modified headers.
+        /// Enables the validation model: expired cache entries are revalidated via
+        /// If-None-Match / If-Modified-Since before re-downloading the full response.
+        /// Does NOT prevent DB queries — use HybridCache for application-level caching.
+        /// </summary>
+        public static IServiceCollection ConfigureHttpCacheHeaders(this IServiceCollection services)
+        {
+            services.AddHttpCacheHeaders(
+                expirationOptions =>
+                {
+                    // Browsers and proxies cache responses for 70 seconds.
+                    expirationOptions.MaxAge = 70;
+                    // Public: browsers, proxies, and CDNs may all cache the response.
+                    expirationOptions.CacheLocation = CacheLocation.Public;
+                },
+                validationOptions =>
+                {
+                    // After max-age expires, clients must revalidate before using stale data.
+                    validationOptions.MustRevalidate = true;
+                });
+            return services;
+        }
+}
 }

@@ -9,6 +9,7 @@ method: GET
 headers:
   Accept: application/json
   Cache-Control: max-age=60
+  If-None-Match: '"4E684A32158221899D27594D3B6BA29A"'
 queryParams:
   pageNumber: "1"
   pageSize: "2"
