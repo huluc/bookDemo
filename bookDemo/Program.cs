@@ -1,8 +1,5 @@
 using BookDemo.API.Extensions;
-using BookDemo.Application.Contracts;
 using BookDemo.Application.Mapping;
-using BookDemo.Infrastructure.Services;
-using Microsoft.AspNetCore.Mvc;
 using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,11 +16,6 @@ builder.Services.AddControllers(options =>
 {
     options.RespectBrowserAcceptHeader = true; // Respect the Accept header sent by clients
     options.ReturnHttpNotAcceptable = true; // If the client requests an unsupported media type, return 406 Not Acceptable
-    options.CacheProfiles.Add("60SecondsDuration", new CacheProfile
-    {
-        Duration = 60,
-        VaryByQueryKeys = new[] { "*" }
-    });
 })
     .AddCustomCsvFormatter()
     .AddXmlDataContractSerializerFormatters()
@@ -43,7 +35,8 @@ builder.Services
     .AddCustomMediaTypes()
     .AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly)
     .ConfigureVersioning()
-    .ConfigureResponseCaching(); 
+    .ConfigureResponseCaching()
+    .ConfigureHttpCacheHeaders();
 
 
 var app = builder.Build();
@@ -64,7 +57,19 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("CorsPolicy");
+
+// ─── HTTP Caching Pipeline ────────────────────────────────────────────────
+// Layer 1 — Server-side response cache (HTTP layer)
+// Caches full responses on the server. Serves cached responses to clients
+// that do not send Cache-Control: no-cache.
 app.UseResponseCaching();
+
+// Layer 2 — HTTP cache headers + validation model (HTTP layer)
+// Writes Cache-Control, ETag, and Last-Modified headers to responses.
+// Enables cache validation via If-None-Match / If-Modified-Since → 304 Not Modified.
+// Does NOT prevent DB queries — only reduces response body transfer.
+app.UseHttpCacheHeaders();
+
 app.UseAuthorization();
 
 app.MapControllers();

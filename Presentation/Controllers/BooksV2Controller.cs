@@ -15,7 +15,7 @@ namespace BookDemo.Presentation.Controllers
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/books")]
     [ApiController]
-    [ResponseCache(CacheProfileName = "60SecondsDuration")]
+    //[ResponseCache(CacheProfileName = "60SecondsDuration")]
     public class BooksV2Controller : ControllerBase
     {
         private readonly IServiceManager _services;
@@ -28,7 +28,10 @@ namespace BookDemo.Presentation.Controllers
         [HttpHead]
         [HttpGet(Name = BookRoutes.GetAllV2)]
         [ServiceFilter(typeof(ValidateMediaTypeAttribute))]
-        [ResponseCache(Duration = 60, VaryByQueryKeys = new[] { "*" })]
+        // [ResponseCache] is intentionally removed — Marvin.Cache.Headers handles
+        // Cache-Control header generation globally via ConfigureHttpCacheHeaders.
+        // Adding [ResponseCache] here would conflict with Marvin's headers.
+        //[ResponseCache(Duration = 60, VaryByQueryKeys = new[] { "*" })]
         public async Task<IActionResult> GetBooks([FromQuery] BookQueryParameters bookQueryParameters, [FromQuery] string? fields)
         {
             // Manually construct LinkParameters to avoid [FromQuery] nested binding issue.
