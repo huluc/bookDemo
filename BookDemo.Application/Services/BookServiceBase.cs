@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BookDemo.Application.Contracts;
 using BookDemo.Application.DTOs;
+using BookDemo.Application.Services.V1;
 using BookDemo.Domain.Exceptions;
 using Entities.Models;
 using Microsoft.Extensions.Logging;
@@ -12,12 +13,14 @@ namespace BookDemo.Application.Services
         protected readonly IRepositoryManager _manager;
         protected readonly ILogger _logger;
         protected readonly IMapper _mapper;
+        protected readonly IBookCache _bookCache;
 
-        protected BookServiceBase(IRepositoryManager manager, ILogger logger, IMapper mapper)
+        protected BookServiceBase(IRepositoryManager manager, ILogger logger, IMapper mapper, IBookCache bookCache)
         {
             _manager = manager;
             _logger = logger;
             _mapper = mapper;
+            _bookCache = bookCache;
         }
 
         public async Task<BookDto> GetBookByIdAsync(int id)
@@ -42,6 +45,8 @@ namespace BookDemo.Application.Services
             var book = _mapper.Map<Book>(bookDto);
             _manager.Books.Add(book);
             await _manager.SaveAsync();
+            
+            await _bookCache.InvalidateAsync();
 
             _logger.LogInformation("Book created successfully. Id={BookId}", book.Id);
             return _mapper.Map<BookDto>(book);
@@ -61,6 +66,7 @@ namespace BookDemo.Application.Services
             var existingBook = await GetBookOrThrowAsync(id, trackChanges: true);
             _mapper.Map(bookDto, existingBook);
             await _manager.SaveAsync();
+            await _bookCache.InvalidateAsync();
 
             _logger.LogInformation("Book updated successfully. Id={BookId}", id);
         }
@@ -71,6 +77,7 @@ namespace BookDemo.Application.Services
             var book = await GetBookOrThrowAsync(id, trackChanges: true);
             _manager.Books.Delete(book);
             await _manager.SaveAsync();
+            await _bookCache.InvalidateAsync();
             _logger.LogInformation("Book deleted successfully. Id={BookId}", id);
         }
 
@@ -85,6 +92,7 @@ namespace BookDemo.Application.Services
         {
             _mapper.Map(bookToPatch, bookEntity);
             await _manager.SaveAsync();
+            await _bookCache.InvalidateAsync();
         }
 
         // Shared helper — throws BookNotFoundException if book does not exist.

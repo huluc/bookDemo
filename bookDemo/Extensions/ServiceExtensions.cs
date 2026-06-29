@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using BookDemo.Application.Constants;
 using BookDemo.Application.Contracts;
+using BookDemo.Infrastructure.Caching;
 using BookDemo.Infrastructure.DataShaping;
 using BookDemo.Infrastructure.Persistence;
 using BookDemo.Infrastructure.Repositories;
@@ -185,5 +186,14 @@ namespace BookDemo.API.Extensions
                 });
             return services;
         }
-}
+        public static IServiceCollection ConfigureHybridCache(this IServiceCollection services)
+        {
+            services.AddHybridCache();
+            // Registers HybridBookCache as the IBookCache implementation.
+            // Used by both V1 and V2 — V1 only invalidates, V2 also reads from cache.
+            services.AddScoped<IBookCache, HybridBookCache>();
+            return services;
+        }
+
+    }
 }

@@ -36,7 +36,8 @@ builder.Services
     .AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly)
     .ConfigureVersioning()
     .ConfigureResponseCaching()
-    .ConfigureHttpCacheHeaders();
+    .ConfigureHttpCacheHeaders()
+    .ConfigureHybridCache();
 
 
 var app = builder.Build();

@@ -6,6 +6,7 @@ using V1BookService = BookDemo.Application.Services.V1.BookService;
 using V2BookService = BookDemo.Application.Services.V2.BookService;
 using IBookServiceV1 = BookDemo.Application.Contracts.V1.IBookService;
 using IBookServiceV2 = BookDemo.Application.Contracts.V2.IBookService;
+using Microsoft.Extensions.Caching.Hybrid;
 
 namespace BookDemo.Infrastructure.Services
 {
@@ -54,7 +55,9 @@ namespace BookDemo.Infrastructure.Services
             ILogger<V2BookService> loggerV2,
             IMapper mapper,
             IBookLinks<BookDto> bookLinks,
-            IBookLinks<BookDtoV2> bookLinksV2)
+            IBookLinks<BookDtoV2> bookLinksV2,
+            HybridCache hybridCache,
+            IBookCache bookCache)
         {
             if (repositoryManager is null)
                 throw new ArgumentNullException(nameof(repositoryManager));
@@ -62,13 +65,13 @@ namespace BookDemo.Infrastructure.Services
             // Wire up V1 BookService with its dependencies.
             // IBookLinks<BookDto> maps books to BookDto — no Author field.
             _bookService = new Lazy<IBookServiceV1>(
-                () => new V1BookService(repositoryManager, loggerV1, mapper, bookLinks)
+                () => new V1BookService(repositoryManager, loggerV1, mapper, bookLinks, bookCache)
             );
 
             // Wire up V2 BookService with its dependencies.
             // IBookLinks<BookDtoV2> maps books to BookDtoV2 — includes Author field.
             _bookServiceV2 = new Lazy<IBookServiceV2>(
-                () => new V2BookService(repositoryManager, loggerV2, mapper, bookLinksV2)
+                () => new V2BookService(repositoryManager, loggerV2, mapper, bookLinksV2, hybridCache, bookCache)
             );
         }
 
