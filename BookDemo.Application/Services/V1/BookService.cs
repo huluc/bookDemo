@@ -18,8 +18,8 @@ namespace BookDemo.Application.Services.V1
     {
         private readonly IBookLinks<BookDto> _bookLinks;
 
-        public BookService(IRepositoryManager manager, ILogger<BookService> logger, IMapper mapper, IBookLinks<BookDto> bookLinks)
-            : base(manager, logger, mapper)
+        public BookService(IRepositoryManager manager, ILogger<BookService> logger, IMapper mapper, IBookLinks<BookDto> bookLinks, IBookCache bookCache)
+            : base(manager, logger, mapper, bookCache)
         {
             _bookLinks = bookLinks;
         }

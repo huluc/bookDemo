@@ -12,11 +12,12 @@ namespace BookDemo.Application.Mapping
         public MappingProfile()
         {
             CreateMap<BookForUpdateDto, Book>()
-                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
             CreateMap<Book, BookForUpdateDto>();
             CreateMap<Book, BookDto>();
             CreateMap<BookForCreationDto, Book>();
-            CreateMap<Book, BookDtoV2>(); 
+            CreateMap<Book, BookDtoV2>();
         }
     }
 }
