@@ -11,6 +11,7 @@ using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
 
 namespace BookDemo.API.Extensions
 {
@@ -192,6 +193,58 @@ namespace BookDemo.API.Extensions
             // Registers HybridBookCache as the IBookCache implementation.
             // Used by both V1 and V2 — V1 only invalidates, V2 also reads from cache.
             services.AddScoped<IBookCache, HybridBookCache>();
+            return services;
+        }
+        /// <summary>
+        /// Configures rate limiting using the built-in .NET rate limiter (Token Bucket algorithm).
+        /// Partitioned per client IP — each client gets its own bucket, so one noisy client
+        /// cannot exhaust the limit for everyone else.
+        /// Token bucket allows controlled bursts (up to TokenLimit) while enforcing a steady
+        /// average rate via periodic replenishment.
+        /// Activated in the pipeline via app.UseRateLimiter().
+        /// </summary>
+        public static IServiceCollection ConfigureRateLimiting(this IServiceCollection services)
+        {
+            services.AddRateLimiter(options =>
+            {
+                // Default rejection status when no tokens are available.
+                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+                // One token bucket per client IP address.
+                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+                {
+                    var partitionKey = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+                    return RateLimitPartition.GetTokenBucketLimiter(partitionKey, _ =>
+                        new TokenBucketRateLimiterOptions
+                        {
+                            // Bucket capacity → max number of requests in a single burst.
+                            TokenLimit = 100,
+                            // 10 tokens added each period → sustained rate of 10 req/sec.
+                            TokensPerPeriod = 10,
+                            ReplenishmentPeriod = TimeSpan.FromSeconds(1),
+                            // No queueing — reject immediately when the bucket is empty.
+                            // For an HTTP API a fast 429 is better than holding the request.
+                            QueueLimit = 0,
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                            AutoReplenishment = true
+                        });
+                });
+
+                // Custom rejection response: sets Retry-After so clients know when to retry.
+                options.OnRejected = async (context, token) =>
+                {
+                    if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+                    {
+                        context.HttpContext.Response.Headers.RetryAfter =
+                            ((int)retryAfter.TotalSeconds).ToString();
+                    }
+
+                    await context.HttpContext.Response.WriteAsync(
+                        "Too many requests. Please try again later.", token);
+                };
+            });
+
             return services;
         }
 

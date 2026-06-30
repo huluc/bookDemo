@@ -37,7 +37,8 @@ builder.Services
     .ConfigureVersioning()
     .ConfigureResponseCaching()
     .ConfigureHttpCacheHeaders()
-    .ConfigureHybridCache();
+    .ConfigureHybridCache()
+    .ConfigureRateLimiting();
 
 
 var app = builder.Build();
@@ -59,6 +60,8 @@ app.UseHttpsRedirection();
 
 app.UseCors("CorsPolicy");
 
+app.UseRateLimiter();
+
 // ─── HTTP Caching Pipeline ────────────────────────────────────────────────
 // Layer 1 — Server-side response cache (HTTP layer)
 // Caches full responses on the server. Serves cached responses to clients
@@ -75,6 +78,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/health", () => Results.Ok("healthy"));
+app.MapGet("/health", () => Results.Ok("healthy"))
+   .DisableRateLimiting();
 
 app.Run();
