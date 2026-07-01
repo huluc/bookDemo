@@ -38,7 +38,8 @@ builder.Services
     .ConfigureResponseCaching()
     .ConfigureHttpCacheHeaders()
     .ConfigureHybridCache()
-    .ConfigureRateLimiting();
+    .ConfigureRateLimiting()
+    .ConfigureIdentity();
 
 
 var app = builder.Build();

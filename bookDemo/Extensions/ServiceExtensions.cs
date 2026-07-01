@@ -3,11 +3,13 @@ using BookDemo.Application.Constants;
 using BookDemo.Application.Contracts;
 using BookDemo.Infrastructure.Caching;
 using BookDemo.Infrastructure.DataShaping;
+using BookDemo.Infrastructure.Identity;
 using BookDemo.Infrastructure.Persistence;
 using BookDemo.Infrastructure.Repositories;
 using BookDemo.Infrastructure.Services;
 using BookDemo.Presentation.Filters;
 using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
@@ -248,5 +250,44 @@ namespace BookDemo.API.Extensions
             return services;
         }
 
+        // AddIdentity<ApplicationUser, IdentityRole> registers a lot behind this single line:
+        // UserManager<ApplicationUser>, RoleManager<IdentityRole>, SignInManager<ApplicationUser>,
+        // password hasher, validators, etc. No need to register these one by one in the
+        // DI container, this method handles all of it.
+        public static IServiceCollection ConfigureIdentity(this IServiceCollection services)
+        {
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                // Password/Lockout settings below are configurable to taste, these are
+                // common/reasonable defaults. RequireNonAlphanumeric = false is set here
+                // because in interview/demo projects it's often practical to relax
+                // password rules a bit for easier testing — tighten this if needed.
+
+                // Password policy
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+
+                // Lockout policy
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+
+                // User policy
+                options.User.RequireUniqueEmail = true;
+            })
+            // Tells Identity "where will you store user/role data". Without this,
+            // UserManager can't function because it wouldn't know which DbContext
+            // to persist data through.
+            .AddEntityFrameworkStores<RepositoryContext>()
+            // Provides token generation for operations like email confirmation and
+            // password reset. Not used right away since we're focused on login/register
+            // for now, but this infrastructure will be ready if a "forgot password"
+            // feature is added later.
+            .AddDefaultTokenProviders();
+            return services;
+        }
     }
 }
