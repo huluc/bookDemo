@@ -1,16 +1,12 @@
 $kind: http-request
 name: Patch
 method: PATCH
-url: "{{baseURL}}/api/books/1"
+url: "{{baseURL}}/api/v1/books/1"
 headers:
   Content-Type: application/json-patch+json
 body:
   type: json
-  content: "[\r
-
-    \  { \"op\": \"replace\", \"path\": \"/price\", \"value\": 19.99 }\r
-
-    ]"
+  content: "[\r\n\r\n    \  { \"op\": \"replace\", \"path\": \"/price\", \"value\": 19.99 }\r\n\r\n    ]"
 settings:
   disabledSystemHeaders:
     - content-type

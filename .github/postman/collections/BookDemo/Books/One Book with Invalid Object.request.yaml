@@ -1,6 +1,6 @@
 $kind: http-request
 name: One Book with Invalid Object
-url: "{{baseURL}}/api/books"
+url: "{{baseURL}}/api/v1/books"
 method: POST
 body:
   type: json

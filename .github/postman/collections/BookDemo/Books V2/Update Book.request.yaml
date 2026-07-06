@@ -7,12 +7,4 @@ headers:
   Content-Type: application/json
 body:
   type: json
-  content: "{\r
-
-    \    \"title\": \"The Catcdfdsf\",\r
-
-    \    \"price\": 489,\r
-
-    \    \"author\": \"Zülal\"\r
-
-    }"
+  content: "{\r\n\r\n    \    \"title\": \"The Catcdfdsf\",\r\n\r\n    \    \"price\": 489,\r\n\r\n    \    \"author\": \"Zülal\"\r\n\r\n    }"

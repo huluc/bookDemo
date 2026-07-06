@@ -287,6 +287,8 @@ namespace BookDemo.API.Extensions
             // for now, but this infrastructure will be ready if a "forgot password"
             // feature is added later.
             .AddDefaultTokenProviders();
+
+            services.AddScoped<IIdentityService, IdentityService>();
             return services;
         }
     }
