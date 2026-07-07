@@ -11,4 +11,14 @@ body:
     \    \"password\": \"Test1234\"\r
 
     }"
+scripts:
+  - type: afterResponse
+    code: "const response = pm.response.json();\r
+
+      if (response.token) {\r
+
+      \    pm.collectionVariables.set(\"token\", response.token);\r
+
+      }"
+    language: text/javascript
 order: 970063499997170

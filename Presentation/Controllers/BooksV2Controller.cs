@@ -5,6 +5,7 @@ using BookDemo.Application.DTOs;
 using BookDemo.Application.Models.LinkModels;
 using BookDemo.Application.RequestFeatures;
 using BookDemo.Presentation.Filters;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -25,6 +26,7 @@ namespace BookDemo.Presentation.Controllers
             _services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
+        [Authorize]
         [HttpHead]
         [HttpGet(Name = BookRoutes.GetAllV2)]
         [ServiceFilter(typeof(ValidateMediaTypeAttribute))]

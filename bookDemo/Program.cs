@@ -41,6 +41,7 @@ builder.Services
     .ConfigureHybridCache()
     .ConfigureRateLimiting()
     .ConfigureIdentity()
+    .ConfigureJwtAuthentication(builder.Configuration)
     .Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 
@@ -61,25 +62,43 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// ─── Middleware Pipeline Order ──────────────────────────────────────────
+// Order matters here: each middleware only sees what the previous ones
+// let through, and some depend on state set by the ones before them.
+
 app.UseCors("CorsPolicy");
+// CORS runs first: reject cross-origin requests early, before spending
+// any work on authenticating a request we're going to block anyway.
+
+app.UseAuthentication();
+// Authentication answers "who is this?" — reads the JWT (if present),
+// validates its signature/issuer/audience/expiry, and populates
+// HttpContext.User with the resulting claims. Must run before
+// UseAuthorization(), and before any middleware that might need to
+// know the caller's identity (e.g. per-user rate limiting later).
 
 app.UseRateLimiter();
+// Currently partitioned per-IP, so its position relative to
+// authentication doesn't matter yet. If this becomes per-user
+// (partitioned by claims from HttpContext.User), it MUST move to
+// after UseAuthentication().
 
-// ─── HTTP Caching Pipeline ────────────────────────────────────────────────
-// Layer 1 — Server-side response cache (HTTP layer)
-// Caches full responses on the server. Serves cached responses to clients
-// that do not send Cache-Control: no-cache.
 app.UseResponseCaching();
+// Layer 1 HTTP caching — serves full cached responses when applicable.
 
-// Layer 2 — HTTP cache headers + validation model (HTTP layer)
-// Writes Cache-Control, ETag, and Last-Modified headers to responses.
-// Enables cache validation via If-None-Match / If-Modified-Since → 304 Not Modified.
-// Does NOT prevent DB queries — only reduces response body transfer.
 app.UseHttpCacheHeaders();
+// Layer 2 HTTP caching — writes Cache-Control/ETag/Last-Modified headers,
+// enables 304 Not Modified via conditional requests.
 
 app.UseAuthorization();
+// Authorization answers "is this identity allowed to do this?" — checks
+// [Authorize]/[Authorize(Roles = "...")] against HttpContext.User.
+// Must run after UseAuthentication(): without an authenticated identity,
+// every authorization check would fail regardless of the actual user.
 
 app.MapControllers();
+// Endpoint execution — by this point, identity and permissions are
+// already resolved; this is where the actual controller action runs.
 
 app.MapGet("/health", () => Results.Ok("healthy"))
    .DisableRateLimiting();

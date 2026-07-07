@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using BookDemo.Application.Constants;
 using BookDemo.Application.Contracts;
+using BookDemo.Application.Options;
 using BookDemo.Infrastructure.Caching;
 using BookDemo.Infrastructure.DataShaping;
 using BookDemo.Infrastructure.Identity;
@@ -9,10 +10,13 @@ using BookDemo.Infrastructure.Repositories;
 using BookDemo.Infrastructure.Services;
 using BookDemo.Presentation.Filters;
 using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.Threading.RateLimiting;
 
 namespace BookDemo.API.Extensions
@@ -289,7 +293,63 @@ namespace BookDemo.API.Extensions
             .AddDefaultTokenProviders();
 
             services.AddScoped<IIdentityService, IdentityService>();
+
+            return services;
+        }
+
+        // This method wires up two related JWT responsibilities in one place:
+        // 1) Token generation (ITokenService, used at login to issue JWTs)
+        // 2) Token validation (AddJwtBearer, used on every authenticated request)
+        // Both rely on the same JwtSettings (SecretKey, Issuer, Audience), so
+        // keeping them together avoids scattering JWT-related config.
+        public static IServiceCollection ConfigureJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+        {
+            // We read JwtSettings directly from IConfiguration here (not IOptions<T>),
+            // because this method runs while the DI container is still being built
+            // (builder.Services), before it's available for injection. IOptions<T>
+            // only becomes usable later, once services are actually resolved at runtime
+            // (e.g. inside TokenService's constructor).
+            var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()
+                ?? throw new InvalidOperationException("JwtSettings section is missing in configuration.");
+
+            // Registers the service responsible for issuing JWTs at login.
             services.AddScoped<ITokenService, TokenService>();
+
+            services.AddAuthentication(options =>
+            {
+                // Tells ASP.NET Core: by default, use JWT Bearer scheme to
+                // authenticate and challenge requests (instead of Identity's
+                // default cookie-based scheme).
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    // Checks that the token's "iss" claim matches our own API —
+                    // rejects tokens issued by some other authority.
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+
+                    // Checks that the token's "aud" claim matches our expected client —
+                    // rejects tokens meant for a different audience/application.
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
+
+                    // Re-computes the signature using our SecretKey and compares it
+                    // against the token's signature. This is what actually prevents
+                    // tampering
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+
+                    // By default .NET allows a 5-minute grace period past expiry.
+                    // Setting this to zero enforces expiry strictly, at the exact
+                    // "exp" timestamp.
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
 
             return services;
         }
