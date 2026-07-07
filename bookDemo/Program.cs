@@ -1,5 +1,6 @@
 using BookDemo.API.Extensions;
 using BookDemo.Application.Mapping;
+using BookDemo.Application.Options;
 using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,7 +40,8 @@ builder.Services
     .ConfigureHttpCacheHeaders()
     .ConfigureHybridCache()
     .ConfigureRateLimiting()
-    .ConfigureIdentity();
+    .ConfigureIdentity()
+    .Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 
 var app = builder.Build();

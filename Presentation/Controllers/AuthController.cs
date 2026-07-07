@@ -12,10 +12,12 @@ namespace BookDemo.Presentation.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IIdentityService _identityService;
+        private readonly ITokenService _tokenService;
 
-        public AuthController(IIdentityService identityService)
+        public AuthController(IIdentityService identityService, ITokenService tokenService)
         {
             _identityService = identityService;
+            _tokenService = tokenService;
         }
 
         [HttpPost("register")]
@@ -45,17 +47,27 @@ namespace BookDemo.Presentation.Controllers
             {
                 return Unauthorized(new LoginResponse(
                     Succeeded: false,
+                    Token: null,
+                    Expires: null,
                     UserId: null,
                     Errors: new[] { "Invalid email or password." }
                 ));
             }
 
             var userId = await _identityService.GetUserIdAsync(request.Email);
+            var roles = await _identityService.GetRolesAsync(userId!);
+
+            var tokenData = new UserTokenData(userId!, request.Email, roles);
+            var tokenResult = _tokenService.GenerateToken(tokenData);
 
             return Ok(new LoginResponse(
                 Succeeded: true,
+                Token: tokenResult.Token,
+                Expires: tokenResult.Expires,
                 UserId: userId
             ));
         }
+
     }
 }
+

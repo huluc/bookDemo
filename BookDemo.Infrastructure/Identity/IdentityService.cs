@@ -62,5 +62,14 @@ namespace BookDemo.Infrastructure.Identity
 
             return await _userManager.IsInRoleAsync(user, role);
         }
+
+        public async Task<IEnumerable<string>> GetRolesAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return Enumerable.Empty<string>();
+
+            return await _userManager.GetRolesAsync(user);
+        }
     }
 }

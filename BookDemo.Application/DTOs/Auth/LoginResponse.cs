@@ -4,16 +4,10 @@ using System.Text;
 
 namespace BookDemo.Application.DTOs.Auth
 {
-    public record LoginResponse(
-     bool Succeeded,
-     string? UserId,
-     IEnumerable<string>? Errors = null);
-
-    // JWT added:
-    // public record LoginResponse(
-    //     bool Succeeded,
-    //     string? Token,
-    //     DateTime? Expires,
-    //     string? UserId,
-    //     IEnumerable<string>? Errors = null);
+     public record LoginResponse(
+         bool Succeeded,
+         string? Token,
+         DateTime? Expires,
+         string? UserId,
+         IEnumerable<string>? Errors = null);
 }
