@@ -23,7 +23,7 @@ namespace BookDemo.Infrastructure.Identity
             _jwtSettings = jwtSettings.Value;
         }
 
-        public TokenResult GenerateToken(UserTokenData data)
+        public TokenResultDto GenerateToken(UserTokenDataDto data)
         {
             // Claims are the pieces of data embedded inside the token.
             // Sub (subject) = who the token belongs to (user id).
@@ -65,7 +65,7 @@ namespace BookDemo.Infrastructure.Identity
             // (header.payload.signature, base64-encoded).
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-            return new TokenResult(tokenString, expires);
+            return new TokenResultDto(tokenString, expires);
         }
     }
 }

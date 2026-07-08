@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BookDemo.Application.DTOs.Auth
 {
-     public record LoginResponse(
+     public record LoginResponseDto(
          bool Succeeded,
          string? Token,
          DateTime? Expires,

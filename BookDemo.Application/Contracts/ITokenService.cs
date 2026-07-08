@@ -12,6 +12,6 @@ namespace BookDemo.Application.Contracts
     // only requires changing this service, not IIdentityService.
     public interface ITokenService
     {
-        TokenResult GenerateToken(UserTokenData data);
+        TokenResultDto GenerateToken(UserTokenDataDto data);
     }
 }

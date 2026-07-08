@@ -2,7 +2,7 @@
 
 namespace BookDemo.Application.DTOs.Auth
 {
-    public record RegisterRequest
+    public record RegisterRequestDto
    (
         [Required, EmailAddress]
         string Email,

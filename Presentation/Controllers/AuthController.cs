@@ -22,13 +22,13 @@ namespace BookDemo.Presentation.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
         {
             var result = await _identityService.CreateUserAsync(
                 request.Email, request.Password, request.FirstName, request.LastName);
             if (!result.Succeeded)
             {
-                return BadRequest(new RegisterResponse(
+                return BadRequest(new RegisterResponseDto(
                     Succeeded: false,
                     UserId: null,
                     Errors: result.Errors
@@ -40,19 +40,19 @@ namespace BookDemo.Presentation.Controllers
             // never automatically at registration.
             await _identityService.AddToRoleAsync(result.UserId, "User");
 
-            return Ok(new RegisterResponse(
+            return Ok(new RegisterResponseDto(
                 Succeeded: true,
                 UserId: result.UserId
             ));
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
             var isPasswordValid = await _identityService.CheckPasswordAsync(request.Email, request.Password);
             if (!isPasswordValid)
             {
-                return Unauthorized(new LoginResponse(
+                return Unauthorized(new LoginResponseDto(
                     Succeeded: false,
                     Token: null,
                     Expires: null,
@@ -64,10 +64,10 @@ namespace BookDemo.Presentation.Controllers
             var userId = await _identityService.GetUserIdAsync(request.Email);
             var roles = await _identityService.GetRolesAsync(userId!);
 
-            var tokenData = new UserTokenData(userId!, request.Email, roles);
+            var tokenData = new UserTokenDataDto(userId!, request.Email, roles);
             var tokenResult = _tokenService.GenerateToken(tokenData);
 
-            return Ok(new LoginResponse(
+            return Ok(new LoginResponseDto(
                 Succeeded: true,
                 Token: tokenResult.Token,
                 Expires: tokenResult.Expires,

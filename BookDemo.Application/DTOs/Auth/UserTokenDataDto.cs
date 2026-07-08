@@ -4,7 +4,8 @@ using System.Text;
 
 namespace BookDemo.Application.DTOs.Auth
 {
-    public record TokenResult(
-        string Token,
-        DateTime Expires);
+    public record UserTokenDataDto(
+     string UserId,
+     string Email,
+     IEnumerable<string> Roles);
 }
