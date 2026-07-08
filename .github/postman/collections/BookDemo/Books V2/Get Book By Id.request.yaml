@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Book By Id
+url: "{{baseURL}}/api/v2/books/5"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 2589063321228694

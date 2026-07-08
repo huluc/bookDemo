@@ -1,5 +1,6 @@
 ﻿using BookDemo.Application.Contracts;
 using BookDemo.Application.DTOs.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,12 @@ namespace BookDemo.Presentation.Controllers
                     Errors: result.Errors
                 ));
             }
+
+            // Every new user starts with the "User" role by default.
+            // "Admin" role is assigned separately (see AssignRole below),
+            // never automatically at registration.
+            await _identityService.AddToRoleAsync(result.UserId, "User");
+
             return Ok(new RegisterResponse(
                 Succeeded: true,
                 UserId: result.UserId
@@ -66,6 +73,21 @@ namespace BookDemo.Presentation.Controllers
                 Expires: tokenResult.Expires,
                 UserId: userId
             ));
+        }
+
+        // Only Admins can assign roles — prevents privilege escalation by
+        // regular users. Still worth hardening further in a real deployment
+        // (e.g. restricting which roles can be assigned, audit logging).
+        [HttpPost("assign-role")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AssignRole([FromQuery] string email, [FromQuery] string role)
+        {
+            var userId = await _identityService.GetUserIdAsync(email);
+            if (userId is null)
+                return NotFound("User not found.");
+
+            await _identityService.AddToRoleAsync(userId, role);
+            return Ok($"Role '{role}' assigned to '{email}'.");
         }
 
     }

@@ -1,6 +1,7 @@
 using BookDemo.API.Extensions;
 using BookDemo.Application.Mapping;
 using BookDemo.Application.Options;
+using BookDemo.Infrastructure.Identity;
 using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,6 +47,12 @@ builder.Services
 
 
 var app = builder.Build();
+
+// Seed roles on startup (idempotent — checks existence before creating)
+using (var scope = app.Services.CreateScope())
+{
+    await RoleSeeder.SeedRolesAsync(scope.ServiceProvider);
+}
 
 app.UseGlobalExceptionHandling();
 

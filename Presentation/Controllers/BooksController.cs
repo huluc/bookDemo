@@ -5,6 +5,7 @@ using BookDemo.Application.DTOs;
 using BookDemo.Application.Models.LinkModels;
 using BookDemo.Application.RequestFeatures;
 using BookDemo.Presentation.Filters;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ namespace BookDemo.Presentation.Controllers
 
     // This separation keeps the host thin and allows the same Presentation layer
     // to be reused with different hosts if needed.
-    
+    [Authorize]
     [ServiceFilter(typeof(LogActionAttribute))] // Apply validation filter to all actions in this controller
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/books")]
@@ -73,6 +74,7 @@ namespace BookDemo.Presentation.Controllers
 
         }
         [HttpPost(Name = BookRoutes.Create)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateBook([FromBody] BookForCreationDto bookDto)
         {
             if (bookDto is null)
@@ -83,6 +85,7 @@ namespace BookDemo.Presentation.Controllers
 
         }
         [HttpPut("{id:int}", Name = BookRoutes.Update)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateBook([FromRoute] int id, [FromBody] BookForUpdateDto book)
         {
 
@@ -93,6 +96,7 @@ namespace BookDemo.Presentation.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}", Name = BookRoutes.Delete)]
         public async Task<IActionResult> DeleteBook([FromRoute] int id)
         {
@@ -102,6 +106,7 @@ namespace BookDemo.Presentation.Controllers
 
 
         [HttpPatch("{id:int}", Name = BookRoutes.Patch)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PatchBook([FromRoute] int id, [FromBody] JsonPatchDocument<BookForUpdateDto> bookPatch)
         {
             if (bookPatch is null)
@@ -128,6 +133,7 @@ namespace BookDemo.Presentation.Controllers
             return NoContent(); // 204
         }
 
+        [AllowAnonymous]
         [HttpOptions]
         public IActionResult Options()
         {
