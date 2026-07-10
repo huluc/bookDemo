@@ -12,67 +12,24 @@ namespace BookDemo.Presentation.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly IIdentityService _identityService;
-        private readonly ITokenService _tokenService;
-
-        public AuthController(IIdentityService identityService, ITokenService tokenService)
+        private readonly IAuthService _authService;
+        public AuthController(IAuthService authService)
         {
-            _identityService = identityService;
-            _tokenService = tokenService;
+            _authService = authService;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
         {
-            var result = await _identityService.CreateUserAsync(
-                request.Email, request.Password, request.FirstName, request.LastName);
-            if (!result.Succeeded)
-            {
-                return BadRequest(new RegisterResponseDto(
-                    Succeeded: false,
-                    UserId: null,
-                    Errors: result.Errors
-                ));
-            }
-
-            // Every new user starts with the "User" role by default.
-            // "Admin" role is assigned separately (see AssignRole below),
-            // never automatically at registration.
-            await _identityService.AddToRoleAsync(result.UserId, "User");
-
-            return Ok(new RegisterResponseDto(
-                Succeeded: true,
-                UserId: result.UserId
-            ));
+            var result = await _authService.RegisterAsync(request);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
-            var isPasswordValid = await _identityService.CheckPasswordAsync(request.Email, request.Password);
-            if (!isPasswordValid)
-            {
-                return Unauthorized(new LoginResponseDto(
-                    Succeeded: false,
-                    Token: null,
-                    Expires: null,
-                    UserId: null,
-                    Errors: new[] { "Invalid email or password." }
-                ));
-            }
-
-            var userId = await _identityService.GetUserIdAsync(request.Email);
-            var roles = await _identityService.GetRolesAsync(userId!);
-
-            var tokenData = new UserTokenDataDto(userId!, request.Email, roles);
-            var tokenResult = _tokenService.GenerateToken(tokenData);
-
-            return Ok(new LoginResponseDto(
-                Succeeded: true,
-                Token: tokenResult.Token,
-                Expires: tokenResult.Expires,
-                UserId: userId
-            ));
+            var result = await _authService.LoginAsync(request);
+            return result.Succeeded ? Ok(result) : Unauthorized(result);
         }
 
         // Only Admins can assign roles — prevents privilege escalation by
@@ -82,12 +39,8 @@ namespace BookDemo.Presentation.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AssignRole([FromQuery] string email, [FromQuery] string role)
         {
-            var userId = await _identityService.GetUserIdAsync(email);
-            if (userId is null)
-                return NotFound("User not found.");
-
-            await _identityService.AddToRoleAsync(userId, role);
-            return Ok($"Role '{role}' assigned to '{email}'.");
+            var result = await _authService.AssignRoleAsync(email, role);
+            return result.Succeeded ? Ok(result) : NotFound(result);
         }
 
     }

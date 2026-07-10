@@ -293,6 +293,7 @@ namespace BookDemo.API.Extensions
             .AddDefaultTokenProviders();
 
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IAuthService, AuthService>();   
 
             return services;
         }

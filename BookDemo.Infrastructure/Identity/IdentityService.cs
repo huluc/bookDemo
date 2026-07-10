@@ -1,9 +1,6 @@
 ﻿using BookDemo.Application.Contracts;
 using Microsoft.AspNetCore.Identity;
 using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace BookDemo.Infrastructure.Identity
 {
     public class IdentityService : IIdentityService
