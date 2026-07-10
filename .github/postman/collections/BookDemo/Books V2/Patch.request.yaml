@@ -1,0 +1,13 @@
+$kind: http-request
+name: Patch
+method: PATCH
+url: "{{baseURL}}/api/v2/books/{{bookId}}"
+headers:
+  Content-Type: application/json-patch+json
+body:
+  type: json
+  content: "[\r\n\r\n    \  { \"op\": \"replace\", \"path\": \"/price\", \"value\": 19.99 }\r\n\r\n    ]"
+settings:
+  disabledSystemHeaders:
+    - content-type
+order: 11000

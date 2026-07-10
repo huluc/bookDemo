@@ -1,0 +1,32 @@
+$kind: http-request
+name: Login
+url: "{{baseURL}}/api/auth/login"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"zulal@example.com\",\r
+
+    \    \"password\": \"Test1234\"\r
+
+    }"
+scripts:
+  - type: afterResponse
+    code: "const response = pm.response.json();\r
+
+      if (response.token) {\r
+
+      \    pm.collectionVariables.set(\"token\", response.token);\r
+
+      \    \r
+
+      \     // Decode JWT payload (base64) to log roles without needing jwt.io\r
+
+      \    const payload = JSON.parse(atob(response.token.split('.')[1]));\r
+
+      \    console.log(\"Roles:\", payload);\r
+
+      }\r\n"
+    language: text/javascript
+order: 970063499997170

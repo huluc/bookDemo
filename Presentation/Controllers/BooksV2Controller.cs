@@ -5,12 +5,14 @@ using BookDemo.Application.DTOs;
 using BookDemo.Application.Models.LinkModels;
 using BookDemo.Application.RequestFeatures;
 using BookDemo.Presentation.Filters;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
 namespace BookDemo.Presentation.Controllers
 {
+    [Authorize]
     [ServiceFilter(typeof(LogActionAttribute))]
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/books")]
@@ -56,6 +58,7 @@ namespace BookDemo.Presentation.Controllers
         }
 
         [HttpPost(Name = BookRoutes.CreateV2)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateBook([FromBody] BookForCreationDto bookDto)
         {
             if (bookDto is null)
@@ -66,6 +69,7 @@ namespace BookDemo.Presentation.Controllers
         }
 
         [HttpPut("{id:int}", Name = BookRoutes.UpdateV2)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateBook([FromRoute] int id, [FromBody] BookForUpdateDto book)
         {
             if (book is null)
@@ -76,6 +80,7 @@ namespace BookDemo.Presentation.Controllers
         }
 
         [HttpDelete("{id:int}", Name = BookRoutes.DeleteV2)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBook([FromRoute] int id)
         {
             await _services.BookServiceV2.DeleteBookAsync(id);
@@ -83,6 +88,7 @@ namespace BookDemo.Presentation.Controllers
         }
 
         [HttpPatch("{id:int}", Name = BookRoutes.PatchV2)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PatchBook([FromRoute] int id, [FromBody] JsonPatchDocument<BookForUpdateDto> bookPatch)
         {
             if (bookPatch is null)
@@ -104,6 +110,7 @@ namespace BookDemo.Presentation.Controllers
             return NoContent();
         }
 
+        [AllowAnonymous]
         [HttpOptions]
         public IActionResult Options()
         {

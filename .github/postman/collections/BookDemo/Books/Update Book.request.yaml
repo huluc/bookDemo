@@ -1,0 +1,10 @@
+$kind: http-request
+name: Update Book
+method: PUT
+url: "{{baseURL}}/api/v1/books/5"
+order: 9000
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: '{ "id": 5, "title": "The Catcdfdsf", "price": 489, "author": "Hila" }'

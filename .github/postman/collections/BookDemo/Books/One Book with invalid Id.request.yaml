@@ -1,0 +1,13 @@
+$kind: http-request
+name: One Book with invalid Id
+method: GET
+url: "{{baseURL}}/api/v1/books/5"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 12000
+scripts:
+  - type: afterResponse
+    code: pm.test("Status code is 404", function () { pm.response.to.have.status(404); });
+    language: text/javascript
