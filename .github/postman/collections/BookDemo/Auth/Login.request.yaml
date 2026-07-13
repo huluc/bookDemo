@@ -15,18 +15,20 @@ scripts:
   - type: afterResponse
     code: "const response = pm.response.json();\r
 
-      if (response.token) {\r
+      if (response.accessToken) {\r
 
-      \    pm.collectionVariables.set(\"token\", response.token);\r
+      \    pm.collectionVariables.set(\"token\", response.accessToken);\r
+
+      \    pm.collectionVariables.set(\"refreshToken\", response.refreshToken);\r
 
       \    \r
 
-      \     // Decode JWT payload (base64) to log roles without needing jwt.io\r
+      \    // Decode JWT payload (base64) to log roles without needing jwt.io\r
 
-      \    const payload = JSON.parse(atob(response.token.split('.')[1]));\r
+      \    const payload = JSON.parse(atob(response.accessToken.split('.')[1]));\r
 
-      \    console.log(\"Roles:\", payload);\r
+      \    console.log(\"Payload:\", payload);\r
 
-      }\r\n"
+      }"
     language: text/javascript
 order: 970063499997170

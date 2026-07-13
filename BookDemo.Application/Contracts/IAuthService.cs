@@ -15,6 +15,8 @@ namespace BookDemo.Application.Contracts
         Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request);
         Task<LoginResponseDto> LoginAsync(LoginRequestDto request);
         Task<AssignRoleResponseDto> AssignRoleAsync(string email, string role);
+        Task<LoginResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request);  
+        Task<bool> LogoutAsync(LogoutRequestDto request);                         
 
     }
 }

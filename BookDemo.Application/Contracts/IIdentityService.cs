@@ -15,5 +15,8 @@
 
         //Needed to embed roles into the JWT at login time
         Task<IEnumerable<string>> GetRolesAsync(string userId);
+
+        Task<string?> GetUserEmailAsync(string userId);
+
     }
 }

@@ -314,8 +314,15 @@ namespace BookDemo.API.Extensions
                 ?? throw new InvalidOperationException("JwtSettings section is missing in configuration.");
 
             // Registers the service responsible for issuing JWTs at login.
+            // Token generation (access + refresh tokens)
             services.AddScoped<ITokenService, TokenService>();
 
+            // Refresh token persistence — grouped here because it's part of the
+            // token lifecycle (issue, rotate, revoke), not user/role management
+            // (that's ConfigureIdentity's responsibility).
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+            // Token validation (used on every authenticated request)
             services.AddAuthentication(options =>
             {
                 // Tells ASP.NET Core: by default, use JWT Bearer scheme to

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace BookDemo.Infrastructure.Identity
@@ -23,7 +24,7 @@ namespace BookDemo.Infrastructure.Identity
             _jwtSettings = jwtSettings.Value;
         }
 
-        public TokenResultDto GenerateToken(UserTokenDataDto data)
+        public TokenResultDto GenerateAccessToken(UserTokenDataDto data)
         {
             // Claims are the pieces of data embedded inside the token.
             // Sub (subject) = who the token belongs to (user id).
@@ -66,6 +67,25 @@ namespace BookDemo.Infrastructure.Identity
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
             return new TokenResultDto(tokenString, expires);
+        }
+        public RefreshTokenResultDto GenerateRefreshToken()
+        {
+            // 64 random bytes, Base64-encoded. High entropy is enough here —
+            // unlike passwords, this isn't user-chosen/low-entropy, so we don't
+            // need a slow/salted algorithm.
+            var randomBytes = RandomNumberGenerator.GetBytes(64);
+            var token = Convert.ToBase64String(randomBytes);
+            var expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays);
+
+            return new RefreshTokenResultDto(token, expires);
+        }
+
+        public string ComputeRefreshTokenHash(string token)
+        {
+            // Same principle as password hashing: never persist the raw token.
+            var bytes = Encoding.UTF8.GetBytes(token);
+            var hash = SHA256.HashData(bytes);
+            return Convert.ToHexString(hash);
         }
     }
 }

@@ -43,6 +43,22 @@ namespace BookDemo.Presentation.Controllers
             return result.Succeeded ? Ok(result) : NotFound(result);
         }
 
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
+        {
+            var result = await _authService.RefreshTokenAsync(request);
+            return result.Succeeded ? Ok(result) : Unauthorized(result);
+        }
+
+        // Requires authentication: an anonymous caller shouldn't be able to probe
+        // arbitrary refresh token values without at least holding a valid access token.
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] LogoutRequestDto request)
+        {
+            var succeeded = await _authService.LogoutAsync(request);
+            return succeeded ? Ok(new { message = "Logged out successfully." }) : NotFound();
+        }
     }
 }
 

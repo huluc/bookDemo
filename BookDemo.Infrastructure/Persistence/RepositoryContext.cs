@@ -38,6 +38,8 @@ namespace BookDemo.Infrastructure.Persistence
 
         }
         public DbSet<Book> Books { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
         override protected void OnModelCreating(ModelBuilder modelBuilder)
         {
             // base.OnModelCreating() call order changed: now called FIRST.
@@ -54,6 +56,8 @@ namespace BookDemo.Infrastructure.Persistence
 
             // modelBuilder.ApplyConfigurationsFromAssembly(typeof(RepositoryContext).Assembly);
             modelBuilder.ApplyConfiguration(new BookConfiguration());
+            modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());  
+
         }
     }
 }
