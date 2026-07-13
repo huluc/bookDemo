@@ -10,11 +10,13 @@ namespace BookDemo.Infrastructure.Identity
     {
         private readonly IIdentityService _identityService;
         private readonly ITokenService _tokenService;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
 
-        public AuthService(IIdentityService identityService, ITokenService tokenService)
+        public AuthService(IIdentityService identityService, ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository)
         {
             _identityService = identityService;
             _tokenService = tokenService;
+            _refreshTokenRepository = refreshTokenRepository;
         }
 
         public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
@@ -48,8 +50,7 @@ namespace BookDemo.Infrastructure.Identity
             if (!isPasswordValid)
             {
                 return new LoginResponseDto(
-                    Succeeded: false,
-                    Token: null,
+                    Succeeded: false, AccessToken: null, RefreshToken: null,
                     Expires: null,
                     UserId: null,
                     Errors: new[] { "Invalid email or password." });
@@ -59,13 +60,27 @@ namespace BookDemo.Infrastructure.Identity
             var roles = await _identityService.GetRolesAsync(userId!);
 
             var tokenData = new UserTokenDataDto(userId!, request.Email, roles);
-            var tokenResult = _tokenService.GenerateToken(tokenData);
+            var accessTokenResult = _tokenService.GenerateAccessToken(tokenData);
+
+            var refreshTokenResult = _tokenService.GenerateRefreshToken();
+            var refreshTokenHash = _tokenService.ComputeRefreshTokenHash(refreshTokenResult.Token);
+
+            await _refreshTokenRepository.AddAsync(new RefreshTokenDataDto(
+                TokenHash: refreshTokenHash,
+                UserId: userId!,
+                CreatedAt: DateTime.UtcNow,
+                ExpiresAt: refreshTokenResult.Expires,
+                IsRevoked: false,
+                RevokedAt: null,
+                ReplacedByTokenHash: null));
 
             return new LoginResponseDto(
                 Succeeded: true,
-                Token: tokenResult.Token,
-                Expires: tokenResult.Expires,
-                UserId: userId);
+                AccessToken: accessTokenResult.Token,
+                RefreshToken: refreshTokenResult.Token,   // raw value goes to client; only the hash is stored
+                Expires: accessTokenResult.Expires,
+                UserId: userId
+                );
         }
 
         public async Task<AssignRoleResponseDto> AssignRoleAsync(string email, string role)
@@ -85,5 +100,76 @@ namespace BookDemo.Infrastructure.Identity
                 Succeeded: true,
                 Message: $"Role '{role}' assigned to '{email}'.");
         }
+        public async Task<LoginResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
+        {
+            var incomingHash = _tokenService.ComputeRefreshTokenHash(request.RefreshToken);
+            var stored = await _refreshTokenRepository.GetByHashAsync(incomingHash);
+
+            if (stored is null)
+            {
+                return new LoginResponseDto(false, null, null, null, null,
+                    new[] { "Invalid refresh token." });
+            }
+
+            // REUSE DETECTION: a revoked token being presented again means it
+            // was already rotated once (or logged out) — a legitimate client
+            // only ever holds the LATEST token in the chain. This is a strong
+            // signal of theft, so we respond by revoking every session the
+            // user has, forcing a fresh login everywhere.
+            if (stored.IsRevoked)
+            {
+                await _refreshTokenRepository.RevokeAllForUserAsync(stored.UserId);
+                return new LoginResponseDto(false, null, null, null, null,
+                    new[] { "Refresh token reuse detected. All sessions have been revoked." });
+            }
+
+            if (!stored.IsActive)
+            {
+                return new LoginResponseDto(false, null, null, null, null,
+                    new[] { "Refresh token expired." });
+            }
+
+            var email = await _identityService.GetUserEmailAsync(stored.UserId);
+            var roles = await _identityService.GetRolesAsync(stored.UserId);
+
+            var accessTokenResult = _tokenService.GenerateAccessToken(
+                new UserTokenDataDto(stored.UserId, email!, roles));
+
+            // ROTATION: old token is revoked and linked to the new one via
+            // ReplacedByTokenHash — this is what makes reuse-detection above
+            // possible (we can trace "this token was already replaced").
+            var newRefreshTokenResult = _tokenService.GenerateRefreshToken();
+            var newRefreshTokenHash = _tokenService.ComputeRefreshTokenHash(newRefreshTokenResult.Token);
+
+            await _refreshTokenRepository.RevokeAsync(incomingHash, replacedByTokenHash: newRefreshTokenHash);
+
+            await _refreshTokenRepository.AddAsync(new RefreshTokenDataDto(
+                TokenHash: newRefreshTokenHash,
+                UserId: stored.UserId,
+                CreatedAt: DateTime.UtcNow,
+                ExpiresAt: newRefreshTokenResult.Expires,
+                IsRevoked: false,
+                RevokedAt: null,
+                ReplacedByTokenHash: null));
+
+            return new LoginResponseDto(
+                Succeeded: true,
+                AccessToken: accessTokenResult.Token,
+                RefreshToken: newRefreshTokenResult.Token,
+                Expires: accessTokenResult.Expires,
+                UserId: stored.UserId);
+        }
+
+        public async Task<bool> LogoutAsync(LogoutRequestDto request)
+        {
+            var hash = _tokenService.ComputeRefreshTokenHash(request.RefreshToken);
+            var stored = await _refreshTokenRepository.GetByHashAsync(hash);
+
+            if (stored is null) return false;
+
+            await _refreshTokenRepository.RevokeAsync(hash);
+            return true;
+        }
+
     }
 }

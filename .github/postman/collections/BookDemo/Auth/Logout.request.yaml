@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseURL}}/api/auth/logout"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"refreshToken\": \"{{refreshToken}}\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3641779027795281
