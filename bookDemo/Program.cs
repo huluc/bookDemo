@@ -3,6 +3,7 @@ using BookDemo.Application.Mapping;
 using BookDemo.Application.Options;
 using BookDemo.Infrastructure.Identity;
 using NLog.Web;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,7 @@ builder.Services
     .AddCustomMediaTypes()
     .AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly)
     .ConfigureVersioning()
+    .ConfigureOpenApi()          // ← eklenecek
     .ConfigureResponseCaching()
     .ConfigureHttpCacheHeaders()
     .ConfigureHybridCache()
@@ -60,6 +62,14 @@ app.UseGlobalExceptionHandling();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    app.MapScalarApiReference(options =>
+    {
+        options
+            .WithTitle("BookDemo API")
+            .AddDocument("v1", "Version 1.0", "/openapi/v1.json", isDefault: true)
+            .AddDocument("v2", "Version 2.0", "/openapi/v2.json");
+    });
 }
 
 if (!app.Environment.IsDevelopment())
