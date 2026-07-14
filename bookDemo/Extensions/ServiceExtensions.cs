@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using BookDemo.API.OpenApi;
 using BookDemo.Application.Constants;
 using BookDemo.Application.Contracts;
 using BookDemo.Application.Options;
@@ -16,6 +17,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using System.Reflection;
 using System.Text;
 using System.Threading.RateLimiting;
 
@@ -153,7 +156,13 @@ namespace BookDemo.API.Extensions
                     new QueryStringApiVersionReader("api-version")
                 );
             })
-            .AddMvc(); // ← controller'ların versiyonlama ile düzgün çalışması için gerekli
+            .AddMvc()
+            .AddApiExplorer(options =>
+            {
+                // Required so OpenAPI documents can be grouped by version (v1, v2, ...).
+                // Matches the "vX" format expected by ConfigureOpenApi's ShouldInclude filter.
+                options.GroupNameFormat = "'v'VVV";
+            });
 
             return services;
         }
@@ -361,5 +370,38 @@ namespace BookDemo.API.Extensions
 
             return services;
         }
+
+        public static IServiceCollection ConfigureOpenApi(this IServiceCollection services)
+        {
+            services.AddOpenApi("v1", options =>
+            {
+                options.AddDocumentTransformer<BearerSecuritySchemeDocumentTransformer>();
+                options.AddOperationTransformer<BearerSecurityRequirementOperationTransformer>();
+                options.AddDocumentTransformer((document, context, cancellationToken) =>
+                {
+                    document.Info.Title = "BookDemo API";
+                    document.Info.Version = "v1";
+                    return Task.CompletedTask;
+                });
+
+                options.ShouldInclude = description => description.GroupName == "v1";
+            });
+
+            services.AddOpenApi("v2", options =>
+            {
+                options.AddDocumentTransformer<BearerSecuritySchemeDocumentTransformer>();
+                options.AddOperationTransformer<BearerSecurityRequirementOperationTransformer>();
+                options.AddDocumentTransformer((document, context, cancellationToken) =>
+                {
+                    document.Info.Title = "BookDemo API";
+                    document.Info.Version = "v2";
+                    return Task.CompletedTask;
+                });
+
+                options.ShouldInclude = description => description.GroupName == "v2";
+            });
+            return services;
+        }
+
     }
 }
