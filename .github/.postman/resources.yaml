@@ -1,8 +1,15 @@
-# Use this workspace to collaborate
 workspace:
   id: bd37104c-64cf-48e6-b887-19b346fccf81
-
 localResources:
   specs:
     - ../postman/specs/New Specification/New Specification.yaml
     - ../postman/specs/New Specification-1/New Specification-1.smithy
+cloudResources:
+  collections:
+    ../postman/collections/BookDemo: 51403560-0faf96dd-3f9b-4383-a79b-7939add6e758
+  environments:
+    ../postman/environments/bookDemo Environment.environment.yaml: 51403560-deca760d-3313-4f72-be5c-88dee74dd25b
+    ../postman/environments/bookDemo2 Environment.environment.yaml: 51403560-e9e9068a-83f7-4871-99cf-b60b007e04f7
+  specs:
+    ../postman/specs/New Specification/New Specification.yaml: 893f8fbe-96d8-4398-a221-6f401da21c4c
+    ../postman/specs/New Specification-1/New Specification-1.smithy: c9b83518-c44a-4dcc-9221-bee111b1a6e7
