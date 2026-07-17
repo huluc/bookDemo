@@ -1,4 +1,4 @@
-﻿using Entities.Models;
+﻿using BookDemo.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookDemo.Infrastructure.Persistence.Configurations
@@ -20,25 +20,28 @@ namespace BookDemo.Infrastructure.Persistence.Configurations
         public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<Book> builder)
         {
             builder.HasData(
-            new Book
-            {
-                Id = 1,
-                Title = "Clean Code",
-                Price = 45.90m
-            },
-             new Book
-             {
-                 Id = 2,
-                 Title = "Domain-Driven Design",
-                 Price = 59.99m
-             },
-             new Book
-             {
-                 Id = 3,
-                 Title = "The Pragmatic Programmer",
-                 Price = 39.95m
-             }
-     );
+                new Book
+                {
+                    Id = 1,
+                    Title = "1984",
+                    Author = "George Orwell",
+                    Price = 15.99m
+                },
+                new Book
+                {
+                    Id = 2,
+                    Title = "Sapiens: A Brief History of Humankind",
+                    Author = "Yuval Noah Harari",
+                    Price = 22.50m
+                },
+                new Book
+                {
+                    Id = 3,
+                    Title = "A Brief History of Time",
+                    Author = "Stephen Hawking",
+                    Price = 18.75m
+                }
+            );
         }
     }
 }

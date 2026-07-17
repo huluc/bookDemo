@@ -1,6 +1,6 @@
-﻿using BookDemo.Infrastructure.Identity;
+﻿using BookDemo.Domain.Entities;
+using BookDemo.Infrastructure.Identity;
 using BookDemo.Infrastructure.Persistence.Configurations;
-using Entities.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,6 +38,8 @@ namespace BookDemo.Infrastructure.Persistence
 
         }
         public DbSet<Book> Books { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<BookCategory> BookCategories { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         override protected void OnModelCreating(ModelBuilder modelBuilder)
@@ -56,7 +58,9 @@ namespace BookDemo.Infrastructure.Persistence
 
             // modelBuilder.ApplyConfigurationsFromAssembly(typeof(RepositoryContext).Assembly);
             modelBuilder.ApplyConfiguration(new BookConfiguration());
-            modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());  
+            modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
+            modelBuilder.ApplyConfiguration(new CategoryConfiguration());
+            modelBuilder.ApplyConfiguration(new BookCategoryConfiguration());
 
         }
     }
