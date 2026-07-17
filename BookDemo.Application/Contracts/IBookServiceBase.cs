@@ -1,5 +1,5 @@
 ﻿using BookDemo.Application.DTOs;
-using Entities.Models;
+using BookDemo.Domain.Entities;
 
 namespace BookDemo.Application.Contracts
 {

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using BookDemo.Application.DTOs;
-using Entities.Models;
+using BookDemo.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;

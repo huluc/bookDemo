@@ -1,8 +1,8 @@
 ﻿using BookDemo.Application.Contracts;
 using BookDemo.Application.RequestFeatures;
+using BookDemo.Domain.Entities;
 using BookDemo.Infrastructure.Persistence;
 using BookDemo.Infrastructure.Repositories.Extensions;
-using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookDemo.Infrastructure.Repositories

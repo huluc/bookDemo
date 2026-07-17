@@ -2,8 +2,8 @@
 using BookDemo.Application.Contracts;
 using BookDemo.Application.DTOs;
 using BookDemo.Application.Services.V1;
+using BookDemo.Domain.Entities;
 using BookDemo.Domain.Exceptions;
-using Entities.Models;
 using Microsoft.Extensions.Logging;
 
 namespace BookDemo.Application.Services

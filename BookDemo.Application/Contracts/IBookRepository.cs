@@ -1,5 +1,6 @@
 ﻿using BookDemo.Application.RequestFeatures;
-using Entities.Models;
+using BookDemo.Domain.Entities;
+
 namespace BookDemo.Application.Contracts
 {
     public interface IBookRepository:IRepositoryBase<Book>

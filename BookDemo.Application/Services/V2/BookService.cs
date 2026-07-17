@@ -3,7 +3,6 @@ using BookDemo.Application.Contracts;
 using BookDemo.Application.DTOs;
 using BookDemo.Application.Models.LinkModels;
 using BookDemo.Application.RequestFeatures;
-using Entities.Models;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using IBookServiceV2 = BookDemo.Application.Contracts.V2.IBookService;
