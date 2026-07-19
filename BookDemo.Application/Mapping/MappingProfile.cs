@@ -18,6 +18,11 @@ namespace BookDemo.Application.Mapping
             CreateMap<Book, BookDto>();
             CreateMap<BookForCreationDto, Book>();
             CreateMap<Book, BookDtoV2>();
+            CreateMap<Category, CategoryDto>();
+            CreateMap<CategoryForCreationDto, Category>();
+            CreateMap<CategoryForUpdateDto, Category>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

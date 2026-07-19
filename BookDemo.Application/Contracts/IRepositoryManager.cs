@@ -28,6 +28,8 @@ namespace BookDemo.Application.Contracts
         /// but does NOT perform persistence commits.
         /// </summary>
         IBookRepository Books { get; }
+        ICategoryRepository Categories { get; }
+
 
         /// <summary>
         /// Commits all changes made through repositories

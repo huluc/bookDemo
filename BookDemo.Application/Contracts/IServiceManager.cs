@@ -25,5 +25,7 @@ namespace BookDemo.Application.Contracts
         /// V2 book service — books with Author field.
         /// </summary>
         V2.IBookService BookServiceV2 { get; }
+        ICategoryService CategoryService { get; }
+
     }
 }
