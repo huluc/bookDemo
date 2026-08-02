@@ -1,6 +1,7 @@
 using BookDemo.API.Extensions;
 using BookDemo.Application.Mapping;
 using BookDemo.Application.Options;
+using BookDemo.Infrastructure;
 using BookDemo.Infrastructure.Identity;
 using NLog.Web;
 using Scalar.AspNetCore;
@@ -54,6 +55,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     await RoleSeeder.SeedRolesAsync(scope.ServiceProvider);
+    await AdminUserSeeder.SeedAdminUserAsync(scope.ServiceProvider);
 }
 
 app.UseGlobalExceptionHandling();

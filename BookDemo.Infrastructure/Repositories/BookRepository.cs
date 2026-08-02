@@ -1,4 +1,4 @@
-﻿using BookDemo.Application.Contracts;
+﻿                             using BookDemo.Application.Contracts;
 using BookDemo.Application.RequestFeatures;
 using BookDemo.Domain.Entities;
 using BookDemo.Infrastructure.Persistence;
@@ -25,6 +25,8 @@ namespace BookDemo.Infrastructure.Repositories
             IQueryable<Book> query = trackChanges ? Set : Set.AsNoTracking();
 
             query = query
+                .Include(b => b.BookCategories)
+                    .ThenInclude(bc => bc.Category)
                 .FilterBooks(parameters.MinPrice, parameters.MaxPrice)
                 .Search(parameters.SearchTerm)
                 .Sort(parameters.OrderBy);
@@ -43,9 +45,29 @@ namespace BookDemo.Infrastructure.Repositories
         public async Task<Book?> GetByIdAsync(int id, bool trackChanges)
         {
             if (trackChanges)
-                return await Set.FindAsync(id);
+                // Note: We use FirstOrDefaultAsync instead of FindAsync here.
+                // FindAsync does NOT return an IQueryable<T> - it first checks the
+                // context's change tracker for an already-tracked entity with this key,
+                // and only queries the database if it isn't found. Because it doesn't
+                // produce a composable query, you cannot chain .Include()/.ThenInclude()
+                // onto it. Also, if the entity happened to already be tracked, FindAsync
+                // would skip the DB call entirely and the related data (BookCategories,
+                // Category) would never be loaded - an inconsistent result depending on
+                // tracking state. FirstOrDefaultAsync avoids this by always running an
+                // explicit, composable query.
+                return await Set
+                    .Include(b => b.BookCategories)
+                        .ThenInclude(bc => bc.Category)
+                    .FirstOrDefaultAsync(b => b.Id == id);
             else
-                return await Set.AsNoTracking().SingleOrDefaultAsync(b => b.Id == id);
+                // AsNoTracking + SingleOrDefaultAsync: read-only scenario, no change
+                // tracking overhead. SingleOrDefaultAsync also works fine here since
+                // Id is unique and we expect at most one match.
+                return await Set
+                    .AsNoTracking()
+                    .Include(b => b.BookCategories)
+                        .ThenInclude(bc => bc.Category)
+                    .SingleOrDefaultAsync(b => b.Id == id);
         }
 
         public async Task<IReadOnlyList<Book>> GetByTitleContainsAsync(string text)

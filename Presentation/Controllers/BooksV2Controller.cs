@@ -117,5 +117,21 @@ namespace BookDemo.Presentation.Controllers
             Response.Headers.Add("Allow", "GET, POST, PUT, DELETE, OPTIONS");
             return Ok();
         }
+
+        [HttpPost("{bookId:int}/categories/{categoryId:int}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AssignCategoryToBook([FromRoute] int bookId, [FromRoute] int categoryId)
+        {
+            await _services.CategoryService.AssignCategoryToBookAsync(bookId, categoryId);
+            return NoContent();
+        }
+
+        [HttpDelete("{bookId:int}/categories/{categoryId:int}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RemoveCategoryFromBook([FromRoute] int bookId, [FromRoute] int categoryId)
+        {
+            await _services.CategoryService.RemoveCategoryFromBookAsync(bookId, categoryId);
+            return NoContent();
+        }
     }
 }

@@ -18,5 +18,6 @@ namespace BookDemo.Application.Contracts
         /// Useful for validation without loading the whole entity.
         /// </summary>
         Task<bool> ExistsAsync(int id);
-    }
+        Task<bool> ExistsByNameAsync(string name);
+   }
 }

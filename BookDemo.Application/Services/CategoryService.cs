@@ -4,9 +4,6 @@ using BookDemo.Application.DTOs;
 using BookDemo.Domain.Entities;
 using BookDemo.Domain.Exceptions;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BookDemo.Application.Services
 {
@@ -40,9 +37,12 @@ namespace BookDemo.Application.Services
             if (categoryDto is null)
             {
                 _logger.LogWarning("CreateCategory was called with null payload");
-                throw new ArgumentNullException(nameof(categoryDto));
+                throw new InvalidCategoryPayloadException();
             }
-
+            if (await _manager.Categories.ExistsByNameAsync(categoryDto.Name))
+            {
+                throw new CategoryAlreadyExistsException(categoryDto.Name);
+            }
             _logger.LogInformation("Creating new category. Name={Name}", categoryDto.Name);
 
             var category = _mapper.Map<Category>(categoryDto);
@@ -58,7 +58,7 @@ namespace BookDemo.Application.Services
             if (categoryDto is null)
             {
                 _logger.LogWarning("Category update failed because payload is null. RouteId={RouteId}", id);
-                throw new BadRequestException("Category update payload is null.");
+                throw new InvalidCategoryPayloadException();
             }
 
             var existingCategory = await GetCategoryOrThrowAsync(id, trackChanges: true);
@@ -88,5 +88,75 @@ namespace BookDemo.Application.Services
             }
             return category;
         }
+
+        public async Task AssignCategoryToBookAsync(int bookId, int categoryId)
+        {
+            _logger.LogDebug("Assigning category to book. BookId={BookId}, CategoryId={CategoryId}", bookId, categoryId);
+
+            // Lightweight existence checks — avoids loading full entities just to
+            // validate that both sides of the relationship exist.
+            await EnsureBookExistsAsync(bookId);
+
+            await EnsureCategoryExistsAsync(categoryId);
+
+            if (await _manager.BookCategories.ExistsAsync(bookId, categoryId))
+            {
+                throw new BookCategoryAlreadyExistsException(bookId, categoryId);
+            }
+
+            var bookCategory = new BookCategory { BookId = bookId, CategoryId = categoryId };
+            _manager.BookCategories.Add(bookCategory);
+            await _manager.SaveAsync();
+
+            _logger.LogInformation("Category assigned to book successfully. BookId={BookId}, CategoryId={CategoryId}", bookId, categoryId);
+        }
+
+        public async Task RemoveCategoryFromBookAsync(int bookId, int categoryId)
+        {
+            await EnsureBookExistsAsync(bookId);
+
+            await EnsureCategoryExistsAsync(categoryId);
+
+            _logger.LogDebug("Removing category from book. BookId={BookId}, CategoryId={CategoryId}", bookId, categoryId);
+
+            var existingAssignment = await _manager.BookCategories.GetAsync(bookId, categoryId, trackChanges: true);
+            if (existingAssignment is null)
+            {
+                throw new BookCategoryNotFoundException(bookId, categoryId);
+            }
+
+            _manager.BookCategories.Delete(existingAssignment);
+            await _manager.SaveAsync();
+
+            _logger.LogInformation("Category removed from book successfully. BookId={BookId}, CategoryId={CategoryId}", bookId, categoryId);
+
+
+        }
+        private async Task EnsureCategoryExistsAsync(int id)
+        {
+            if (!await _manager.Categories.ExistsAsync(id))
+            {
+                _logger.LogWarning("Category not found. Id={CategoryId}", id);
+                throw new CategoryNotFoundException(id);
+            }
+        }
+
+        private async Task EnsureBookExistsAsync(int id)
+        {
+            if (!await _manager.Books.ExistsAsync(id))
+            {
+                _logger.LogWarning("Book not found. Id={BookId}", id);
+                throw new BookNotFoundException(id);
+            }
+        }
+
+        public async Task<List<BookDtoV2>> GetBooksByCategoryAsync(int categoryId)
+        {
+            await EnsureCategoryExistsAsync(categoryId);
+
+            var books = await _manager.BookCategories.GetBooksByCategoryAsync(categoryId);
+            return _mapper.Map<List<BookDtoV2>>(books);
+        }
     }
+
 }

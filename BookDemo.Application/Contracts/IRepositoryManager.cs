@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BookDemo.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -29,7 +30,7 @@ namespace BookDemo.Application.Contracts
         /// </summary>
         IBookRepository Books { get; }
         ICategoryRepository Categories { get; }
-
+        IBookCategoryRepository BookCategories { get; }
 
         /// <summary>
         /// Commits all changes made through repositories

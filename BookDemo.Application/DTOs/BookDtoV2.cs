@@ -6,5 +6,6 @@
         public string Title { get; init; } = string.Empty;
         public decimal Price { get; init; }
         public string? Author { get; init; }
+        public List<CategoryDto> Categories { get; init; } = new List<CategoryDto>();
     }
 }

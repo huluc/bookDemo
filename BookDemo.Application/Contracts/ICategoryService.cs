@@ -12,5 +12,8 @@ namespace BookDemo.Application.Contracts
         Task<CategoryDto> CreateCategoryAsync(CategoryForCreationDto categoryDto);
         Task UpdateCategoryAsync(int id, CategoryForUpdateDto categoryDto);
         Task DeleteCategoryAsync(int id);
+        Task AssignCategoryToBookAsync(int bookId, int categoryId);
+        Task RemoveCategoryFromBookAsync(int bookId, int categoryId);
+        Task<List<BookDtoV2>> GetBooksByCategoryAsync(int categoryId);
     }
 }

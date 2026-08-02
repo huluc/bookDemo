@@ -57,7 +57,7 @@ namespace BookDemo.Application.Services
             if (bookDto is null)
             {
                 _logger.LogWarning("Book update failed because payload is null. RouteId={RouteId}", id);
-                throw new BadRequestException("Book update payload is null.");
+                throw new InvalidBookPayloadException();
             }
 
             if (_logger.IsEnabled(LogLevel.Debug))
