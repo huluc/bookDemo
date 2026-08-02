@@ -1,14 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BookDemo.Domain.Exceptions
+﻿namespace BookDemo.Domain.Exceptions
 {
-    public class BadRequestException : Exception
+    public abstract class BadRequestException : Exception
     {
-        public BadRequestException(string message) : base(message)
+        protected BadRequestException(string message) : base(message)
         {
 
+        }
+
+    }
+    public sealed class InvalidCategoryPayloadException : BadRequestException
+    {
+        public InvalidCategoryPayloadException() : base("Category payload cannot be null.")
+        {
+        }
+    }
+
+    public sealed class InvalidBookPayloadException : BadRequestException
+    {
+        public InvalidBookPayloadException() : base("Book payload cannot be null.")
+        {
         }
     }
 }

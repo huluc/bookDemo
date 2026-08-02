@@ -1,3 +1,7 @@
 $kind: collection
 name: Auth
+description: |-
+  Endpoints for user registration, login, role assignment, and JWT  
+  refresh/revocation. Login and Register are public; AssignRole requires  
+  Admin role.
 order: 1018813182115839

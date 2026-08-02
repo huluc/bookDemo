@@ -1,9 +1,9 @@
-﻿using Entities.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using System.Linq.Dynamic.Core;
+using BookDemo.Domain.Entities;
 
 namespace BookDemo.Infrastructure.Repositories.Extensions
 {

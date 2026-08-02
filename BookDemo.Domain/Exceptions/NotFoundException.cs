@@ -14,4 +14,14 @@ namespace BookDemo.Domain.Exceptions
         public BookNotFoundException(int id) 
             : base($"Book with id {id} was not found.") { }
     }
+    public sealed class CategoryNotFoundException : NotFoundException
+    {
+        public CategoryNotFoundException(int id)
+            : base($"Category with id {id} was not found.") { }
+    }
+  public sealed class BookCategoryNotFoundException : NotFoundException
+    {
+        public BookCategoryNotFoundException(int bookId, int categoryId)
+            : base($"Book '{bookId}' is not assigned to Category '{categoryId}'.") { }
+    }
 }

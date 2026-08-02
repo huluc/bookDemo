@@ -4,7 +4,6 @@ using BookDemo.Application.Contracts.V1;
 using BookDemo.Application.DTOs;
 using BookDemo.Application.Models.LinkModels;
 using BookDemo.Application.RequestFeatures;
-using Entities.Models;
 using Microsoft.Extensions.Logging;
 using IBookService = BookDemo.Application.Contracts.V1.IBookService;
 

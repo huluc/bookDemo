@@ -1,5 +1,32 @@
 $kind: collection
 name: BookDemo
+description: |-
+  # BookDemo API
+
+  A layered ASP.NET Core Web API for managing books, built as a  
+  portfolio project demonstrating Clean Architecture, JWT authentication,  
+  API versioning, HATEOAS, and caching strategies.
+
+  ## Base URL
+
+  `{{baseURL}}` — see the environment variable for the active value  
+  (`https://localhost:7093` in Development).
+
+  ## Authentication
+
+  Most write operations require a Bearer JWT. Obtain one via  
+  `POST /api/auth/login`, then set it as the `token` variable or paste it  
+  into the collection's Authorization tab.
+
+  ## API Versions
+
+  - **v1**: original endpoint set
+      
+  - **v2**: adds \[describe what's new in V2, e.g. extended DTOs\]
+      
+
+  Interactive OpenAPI documentation is also available at `/scalar` when  
+  running the API locally.
 variables:
   token: ""
   refreshToken: ""

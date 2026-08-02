@@ -1,0 +1,5 @@
+$kind: collection
+name: Books V2
+description: |-
+  V2 of the Books API. \[Add what differs from v1 — e.g. extended response  
+  shape, new fields\]. Existing v1 clients are unaffected.

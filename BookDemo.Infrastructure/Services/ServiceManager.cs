@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using BookDemo.Application.Contracts;
 using BookDemo.Application.DTOs;
+using BookDemo.Application.Services;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
-using V1BookService = BookDemo.Application.Services.V1.BookService;
-using V2BookService = BookDemo.Application.Services.V2.BookService;
 using IBookServiceV1 = BookDemo.Application.Contracts.V1.IBookService;
 using IBookServiceV2 = BookDemo.Application.Contracts.V2.IBookService;
-using Microsoft.Extensions.Caching.Hybrid;
+using V1BookService = BookDemo.Application.Services.V1.BookService;
+using V2BookService = BookDemo.Application.Services.V2.BookService;
 
 namespace BookDemo.Infrastructure.Services
 {
@@ -35,6 +36,8 @@ namespace BookDemo.Infrastructure.Services
         // V2 BookService instance — created on first access via BookServiceV2 property.
         private readonly Lazy<IBookServiceV2> _bookServiceV2;
 
+        private readonly Lazy<ICategoryService> _categoryService;
+
         /// <summary>
         /// Constructs the ServiceManager and wires up all service dependencies.
         ///
@@ -53,6 +56,7 @@ namespace BookDemo.Infrastructure.Services
             IRepositoryManager repositoryManager,
             ILogger<V1BookService> loggerV1,
             ILogger<V2BookService> loggerV2,
+            ILogger<CategoryService> categoryLogger,
             IMapper mapper,
             IBookLinks<BookDto> bookLinks,
             IBookLinks<BookDtoV2> bookLinksV2,
@@ -73,6 +77,9 @@ namespace BookDemo.Infrastructure.Services
             _bookServiceV2 = new Lazy<IBookServiceV2>(
                 () => new V2BookService(repositoryManager, loggerV2, mapper, bookLinksV2, hybridCache, bookCache)
             );
+            _categoryService = new Lazy<ICategoryService>(
+                () => new CategoryService(repositoryManager, categoryLogger, mapper)
+   );
         }
 
         /// <summary>
@@ -91,5 +98,8 @@ namespace BookDemo.Infrastructure.Services
         /// All new features and endpoints should be built against this service.
         /// </summary>
         public IBookServiceV2 BookServiceV2 => _bookServiceV2.Value;
+
+        public ICategoryService CategoryService => _categoryService.Value;
+
     }
 }

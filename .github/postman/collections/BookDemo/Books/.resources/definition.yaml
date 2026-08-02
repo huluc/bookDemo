@@ -1,0 +1,6 @@
+$kind: collection
+name: Books
+description: |-
+  CRUD operations for books, v1. Read operations are public; Create/  
+  Update/Delete require authentication. Supports filtering, paging,  
+  searching, and field shaping via query parameters.

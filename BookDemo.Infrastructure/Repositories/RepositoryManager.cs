@@ -33,6 +33,8 @@ namespace BookDemo.Infrastructure.Repositories
         // is created only when it is first accessed.
         // This avoids unnecessary object creation.
         private readonly Lazy<IBookRepository> _bookRepository;
+        private readonly Lazy<ICategoryRepository> _categoryRepository;
+        private readonly Lazy<IBookCategoryRepository> _bookCategoryRepository;
 
         /// <summary>
         /// Initializes the RepositoryManager with a DbContext.
@@ -53,12 +55,17 @@ namespace BookDemo.Infrastructure.Repositories
             // The repository will be created using the shared DbContext (_context)
             // when it is first requested.
             _bookRepository = new Lazy<IBookRepository>(() => new BookRepository(_context));
+            _categoryRepository = new Lazy<ICategoryRepository>(() => new CategoryRepository(_context));
+            _bookCategoryRepository = new Lazy<IBookCategoryRepository>(() => new BookCategoryRepository(_context));
         }
 
         // Accessing Value triggers the creation of the repository
         // on the first call.
         // Subsequent calls return the same already-created instance.
         public IBookRepository Books => _bookRepository.Value;
+        public ICategoryRepository Categories => _categoryRepository.Value;
+        public IBookCategoryRepository BookCategories => _bookCategoryRepository.Value;
+
 
         /// <summary>
         /// Persists all changes made through repositories

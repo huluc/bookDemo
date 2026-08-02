@@ -2,8 +2,8 @@
 using BookDemo.Application.Contracts;
 using BookDemo.Application.DTOs;
 using BookDemo.Application.Services.V1;
+using BookDemo.Domain.Entities;
 using BookDemo.Domain.Exceptions;
-using Entities.Models;
 using Microsoft.Extensions.Logging;
 
 namespace BookDemo.Application.Services
@@ -57,7 +57,7 @@ namespace BookDemo.Application.Services
             if (bookDto is null)
             {
                 _logger.LogWarning("Book update failed because payload is null. RouteId={RouteId}", id);
-                throw new BadRequestException("Book update payload is null.");
+                throw new InvalidBookPayloadException();
             }
 
             if (_logger.IsEnabled(LogLevel.Debug))
